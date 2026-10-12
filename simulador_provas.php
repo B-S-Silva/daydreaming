@@ -1,7 +1,6 @@
 <?php
 require_once 'config.php';
 require_once 'verificar_auth.php';
-require_once 'badges_manager.php';
 require_once 'questoes_manager.php';
 
 // Verificar se o usuário está logado

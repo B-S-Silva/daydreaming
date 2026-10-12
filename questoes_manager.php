@@ -193,33 +193,6 @@ class QuestoesManager {
     }
     
     /**
-     * Busca questões para um teste específico
-     */
-    public function buscarQuestoesTeste($tipo_prova, $quantidade = 20, $dificuldade = null) {
-        try {
-            $sql = "SELECT * FROM questoes WHERE tipo_prova = ? AND ativo = 1";
-            $params = [$tipo_prova];
-            
-            if ($dificuldade) {
-                $sql .= " AND dificuldade = ?";
-                $params[] = $dificuldade;
-            }
-            
-            $sql .= " ORDER BY RAND() LIMIT ?";
-            $params[] = $quantidade;
-            
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
-            
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-        } catch (Exception $e) {
-            error_log("Erro ao buscar questões: " . $e->getMessage());
-            return [];
-        }
-    }
-    
-    /**
      * Conta questões disponíveis por tipo
      */
     public function contarQuestoes($tipo_prova = null) {
@@ -342,38 +315,4 @@ class QuestoesManager {
     }
 }
 
-// Funções auxiliares para usar em outros arquivos
-function carregarQuestoesDeArquivo($arquivo_path, $tipo_prova) {
-    $manager = new QuestoesManager();
-    
-    $extensao = strtolower(pathinfo($arquivo_path, PATHINFO_EXTENSION));
-    
-    if ($extensao === 'json') {
-        return $manager->carregarQuestoesJSON($arquivo_path, $tipo_prova);
-    } elseif ($extensao === 'xml') {
-        return $manager->carregarQuestoesXML($arquivo_path, $tipo_prova);
-    } else {
-        return false;
-    }
-}
-
-function buscarQuestoesPorTipo($tipo_prova, $quantidade = 20) {
-    $manager = new QuestoesManager();
-    return $manager->buscarQuestoesTeste($tipo_prova, $quantidade);
-}
-
-function contarQuestoesDisponiveis($tipo_prova = null) {
-    $manager = new QuestoesManager();
-    return $manager->contarQuestoes($tipo_prova);
-}
-
-function validarArquivoQuestoes($arquivo_path) {
-    $manager = new QuestoesManager();
-    return $manager->validarEstruturaJSON($arquivo_path);
-}
-
-function gerarExemploQuestoes($tipo_prova) {
-    $manager = new QuestoesManager();
-    return $manager->gerarExemploJSON($tipo_prova);
-}
 ?>
