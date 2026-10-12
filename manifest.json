@@ -1,0 +1,9 @@
+{
+  "name": "StudyAbroad",
+  "short_name": "StudyAbroad",
+  "description": "Sistema de login e estudos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#187bcb"
+}
