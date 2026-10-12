@@ -40,7 +40,6 @@ yarn-error.log*
 
 # Composer (se houver)
 vendor/
-composer.lock
 
 # Arquivos temporários do PHP
 *.tmp
@@ -106,3 +105,9 @@ jspm_packages/
 
 # Yarn Integrity file
 .yarn-integrity
+# JavaScript workspaces
+node_modules/
+**/node_modules/
+**/dist/
+**/coverage/
+.vite/
