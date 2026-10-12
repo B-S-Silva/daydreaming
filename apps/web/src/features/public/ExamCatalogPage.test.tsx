@@ -27,12 +27,23 @@ const catalog = {
 function mockCatalogResponse(value: unknown = catalog) {
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(value), {
+    vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path === "/api/auth/me") {
+        return new Response(
+          JSON.stringify({
+            authenticated: false,
+            csrfToken: "a".repeat(64),
+            flashMessage: null,
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      return new Response(JSON.stringify(value), {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      }),
-    ),
+      });
+    }),
   );
 }
 
@@ -65,15 +76,44 @@ describe("public pages", () => {
   it("shows loading and error states for the catalog request", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(() => new Promise<Response>(() => {})),
+      vi.fn((input: RequestInfo | URL) =>
+        String(input) === "/api/auth/me"
+          ? Promise.resolve(
+              new Response(
+                JSON.stringify({
+                  authenticated: false,
+                  csrfToken: "a".repeat(64),
+                  flashMessage: null,
+                }),
+                { status: 200 },
+              ),
+            )
+          : new Promise<Response>(() => {}),
+      ),
     );
     openCatalog();
     expect(screen.getByRole("status").textContent).toBe("Carregando catálogo...");
 
     cleanup();
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("API offline")));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) =>
+        String(input) === "/api/auth/me"
+          ? Promise.resolve(
+              new Response(
+                JSON.stringify({
+                  authenticated: false,
+                  csrfToken: "a".repeat(64),
+                  flashMessage: null,
+                }),
+                { status: 200 },
+              ),
+            )
+          : Promise.reject(new Error("API offline")),
+      ),
+    );
     openCatalog();
-    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "API offline");
+    expect(await screen.findByText("API offline")).toBeTruthy();
   });
 
   it("filters by continent and country and shows the empty state", async () => {

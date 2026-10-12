@@ -2,9 +2,9 @@
 
 ## Escopo e evidências
 
-Esta arquitetura registra a análise estática aprovada na Fase 1. A limpeza anterior removeu `LIMPEZA.md` quando os Markdown antigos foram excluídos. Usei `AGENTS.MD`, o `README.md` preservado e inspeção estática dos PHP, HTML, SQL e arquivos JSON atuais. PHP não está disponível e o MySQL não foi consultado; portanto, schema real, contratos em execução e paridade ainda exigem validação em ambiente seguro.
+Esta arquitetura registra a análise estática aprovada na Fase 1. A limpeza anterior removeu `LIMPEZA.md` quando os Markdown antigos foram excluídos. Usei `AGENTS.MD`, o `README.md` preservado e inspeção estática dos PHP, HTML, SQL e arquivos JSON atuais. PHP não está disponível. O MySQL foi provisionado para desenvolvimento e as tabelas de autenticação/logs foram inspecionadas; schema dos demais módulos, contratos em execução e paridade ainda exigem validação em ambiente seguro.
 
-Fase 2 está em andamento na branch `migracao/typescript`. O setup e o módulo público (home e catálogo de exames) estão commitados; as telas e os contratos locais de autenticação estão sendo preparados, mas não haverá integração de persistência enquanto o banco não existir. Código PHP e banco permanecem intactos durante a migração.
+Fase 2 está em andamento na branch `migracao/typescript`. O setup e o módulo público (home e catálogo de exames) estão commitados; autenticação usa a API TypeScript e o banco de desenvolvimento dedicado. O PHP e suas tabelas/dados permanecem intactos; a migração adicionou somente `node_sessions` ao schema novo.
 
 ## Mapa do sistema atual
 
@@ -127,15 +127,15 @@ React Router para as páginas listadas; layout público, autenticado e admin sep
 
 ### Sessão e senha
 
-Recomendo sessão opaca server-side com cookie `httpOnly`, `Secure` em produção, `SameSite=Strict`/compatibilidade testada, expiração de 1h e invalidação no logout, armazenada em Redis para evitar alteração de tabela existente e suportar múltiplas instâncias. Redis é nova infraestrutura; requer disponibilidade/TTL/backup adequado e segredo de sessão. Proteger mutações com CSRF token sincronizado + validação de Origin e rate limit. Checar papel/conta ativa no servidor; não confiar em role enviada pelo cliente.
+Foi escolhida sessão opaca server-side em MySQL, sem alterar as tabelas PHP existentes. `node_sessions` guarda somente SHA-256 do token aleatório, usuário opcional, CSRF, flash message e expiração; o cookie é `httpOnly`, `SameSite=Strict`, `Secure` por padrão em produção, com TTL configurável (padrão de 1h). Login rotaciona o token, logout revoga a sessão e mantém o aviso de sessão seguinte. Mutations validam CSRF e `Origin`; a conta ativa e o papel são lidos no servidor. Redis e JWT não são usados.
 
-Como ainda não há banco de desenvolvimento, a Fase 2 prepara somente os contratos compartilhados e as telas de autenticação com validação local. Nenhum dado é enviado ou armazenado, e não se simulam contas, login, email de recuperação ou sessão. A integração permanece bloqueada até que exista um banco isolado para introspecção read-only e testes.
+Os endpoints `GET /api/auth/me`, `POST /api/auth/login`, `POST /api/auth/register` e `POST /api/auth/logout` agora consultam o schema de autenticação dedicado. Login aceita hashes compatíveis com `password_verify`; cadastro grava a tabela `usuarios` desse banco. A recuperação segue indisponível porque o PHP gera token descartável e não envia email nem persiste tokens.
 
-Senha: verificar hashes existentes em cópia sanitizada; suporte bcrypt no login Node para hashes compatíveis com PHP e estratégia sem reset obrigatório. Rehash apenas após login bem-sucedido e em transação, preservando coluna `senha` e formato até decisão/schema validado. No fluxo misto, sessões PHP/Node não compartilham estado automaticamente: manter autenticação no PHP até cutover coordenado da feature de usuários, ou implementar ponte limitada, temporária e testada; definir domínio, nome e renovação de cookie antes da Fase 2.
+Senha: suporte bcrypt no login Node para hashes compatíveis com PHP e estratégia sem reset obrigatório. Hashes PHP reais ainda precisam de um teste de paridade em cópia sanitizada. Não há rehash automático; coluna `senha` e hashes existentes não são alterados. No fluxo misto, sessões PHP/Node não compartilham estado: manter páginas PHP protegidas no runtime PHP até cutover coordenado; o cookie Node não autentica o PHP.
 
 ## Destino por módulo
 
-As rotas API são propostas, não implementadas. Prefixo comum `/api/v1`. Aliases PHP devem continuar disponíveis enquanto o módulo antigo não tiver paridade e tráfego comutado.
+As rotas da tabela são propostas, exceto os endpoints de autenticação já implementados sob `/api/auth`. Aliases PHP devem continuar disponíveis enquanto o módulo antigo não tiver paridade e tráfego comutado.
 
 | Feature / origem PHP                                                                               | API proposta                                                                                                                                                                                                | Página/componentes React                                                                                              | Service e tipos compartilhados                                                                             |
 | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -165,27 +165,26 @@ As rotas API são propostas, não implementadas. Prefixo comum `/api/v1`. Aliase
 
 O PHP atual não lê ambiente de forma detectada; valores de conexão/constants ficam em `config.php` (ignorado no Git). Nada de copiar credenciais a `.env` versionado. Proposta para o novo runtime:
 
-| Nome                                                                                    | Uso                                              | Obrigatoriedade                                                          |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------ |
-| `NODE_ENV`                                                                              | modo de execução e defaults seguros              | Obrigatório                                                              |
-| `API_PORT`                                                                              | porta Fastify                                    | Obrigatório                                                              |
-| `WEB_ORIGIN`                                                                            | origem permitida para CORS/Origin                | Obrigatório                                                              |
-| `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` | mesma instância/schema MySQL existente           | Obrigatórios; secrets protegidos                                         |
-| `DATABASE_CHARSET`                                                                      | preservar charset utf8mb4                        | Default explícito `utf8mb4`                                              |
-| `DATABASE_TIME_ZONE`                                                                    | regra de conexão/datas; definir após auditoria   | Default explícito, não inferir sem validação                             |
-| `REDIS_URL`                                                                             | store de sessão server-side                      | Obrigatório para produção na arquitetura proposta                        |
-| `SESSION_SECRET`                                                                        | assinar cookie/session id ou mecanismo escolhido | Segredo obrigatório; rotação documentada                                 |
-| `SESSION_TTL_SECONDS`                                                                   | vida da sessão (baseline atual 3600s)            | Default 3600, confirmar expiração PHP real                               |
-| `COOKIE_SECURE`, `COOKIE_SAME_SITE`                                                     | atributos por ambiente                           | `Secure=true` em HTTPS produção; SameSite testado                        |
-| `UPLOAD_MAX_BYTES`                                                                      | limite multipart/importação                      | Definir após medir configuração atual do PHP e estabelecer limite aceito |
-| `VITE_API_BASE_URL`                                                                     | base da API visível no browser                   | Obrigatório por ambiente; nunca conter segredo                           |
+| Nome                                              | Uso                                            | Obrigatoriedade                                                          |
+| ------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------ |
+| `NODE_ENV`                                        | modo de execução e defaults seguros            | Obrigatório                                                              |
+| `API_PORT`                                        | porta Fastify                                  | Default `3001`                                                           |
+| `WEB_ORIGIN`                                      | origem permitida para validação de Origin      | Default `http://localhost:5173`                                          |
+| `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME` | instância/schema MySQL de desenvolvimento      | Defaults de desenvolvimento                                              |
+| `DATABASE_USER`, `DATABASE_PASSWORD`              | acesso MySQL da API                            | Obrigatórios; secrets protegidos                                         |
+| `DATABASE_CHARSET`                                | preservar charset utf8mb4                      | Default explícito `utf8mb4`                                              |
+| `DATABASE_TIME_ZONE`                              | regra de conexão/datas; definir após auditoria | Default explícito, não inferir sem validação                             |
+| `SESSION_TTL_SECONDS`                             | vida da sessão Node                            | Default 3600                                                             |
+| `COOKIE_SECURE`                                   | atributo seguro do cookie                      | Padrão `true` em produção; HTTPS obrigatório                             |
+| `UPLOAD_MAX_BYTES`                                | limite multipart/importação                    | Definir após medir configuração atual do PHP e estabelecer limite aceito |
+| `VITE_API_BASE_URL`                               | base da API visível no browser                 | Obrigatório por ambiente; nunca conter segredo                           |
 
 SMTP não deve ser configurado como se já existisse: só acrescentar SMTP/provider, sender e templates se redefinição real de senha for especificada e aprovada; hoje é simulação sem entrega de email.
 
 ## Validações antes de implementação
 
-1. Identificar host/base do MySQL de desenvolvimento usando procedimento local seguro; obter somente metadados `INFORMATION_SCHEMA` de tabelas/colunas/PK/FK/índices; nunca rodar setup, reset ou migration.
+1. Para cada módulo restante, obter somente metadados `INFORMATION_SCHEMA` de tabelas/colunas/PK/FK/índices; autenticação já foi inspecionada no schema de desenvolvimento. Nunca rodar setup, reset ou migration.
 2. Resolver aliases de colunas citados e identificar quais dados/hash estão efetivamente presentes; não copiar dados produtivos para fixtures.
 3. Rodar PHP existente contra banco isolado para fixtures de login/cadastro/fórum/importação/resposta/finalização e registrar HTTP, redirects, mensagens, JSON e efeitos transacionais sem alterações ao banco compartilhado.
-4. Decidir alvo real do portal de recuperação de senha e plano de compatibilidade de sessões/cookies antes de cortar auth.
+4. Definir recuperação de senha real e plano de compatibilidade de sessões/cookies PHP/Node antes de cortar auth.
 5. Confirmar que credenciais de exemplo em `README.md` são apenas documentação e nunca dados de produção.

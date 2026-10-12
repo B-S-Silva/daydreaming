@@ -186,12 +186,41 @@ export const CurrentUserResponseSchema = z.discriminatedUnion("authenticated", [
   z.object({
     authenticated: z.literal(true),
     user: AuthenticatedUserSchema,
+    csrfToken: z.string().length(64),
+    flashMessage: z.string().nullable(),
   }),
-  z.object({ authenticated: z.literal(false) }),
+  z.object({
+    authenticated: z.literal(false),
+    csrfToken: z.string().length(64),
+    flashMessage: z.string().nullable(),
+  }),
 ]);
+
+export const AuthValidationResponseSchema = z.object({
+  message: z.string(),
+  errors: z.array(
+    z.object({
+      field: z.string(),
+      message: z.string(),
+    }),
+  ),
+});
+
+export const AuthSuccessResponseSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+  user: AuthenticatedUserSchema.optional(),
+});
+
+export const AuthErrorResponseSchema = z.object({
+  message: z.string(),
+});
 
 export type LoginInput = z.infer<typeof LoginInputSchema>;
 export type RegistrationInput = z.infer<typeof RegistrationInputSchema>;
 export type PasswordRecoveryInput = z.infer<typeof PasswordRecoveryInputSchema>;
 export type AuthenticatedUser = z.infer<typeof AuthenticatedUserSchema>;
 export type CurrentUserResponse = z.infer<typeof CurrentUserResponseSchema>;
+export type AuthValidationResponse = z.infer<typeof AuthValidationResponseSchema>;
+export type AuthSuccessResponse = z.infer<typeof AuthSuccessResponseSchema>;
+export type AuthErrorResponse = z.infer<typeof AuthErrorResponseSchema>;

@@ -1,12 +1,28 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { LoginInputSchema, type LoginInput } from "@daydreaming/shared";
 import { AuthPageLayout } from "./AuthPageLayout.js";
+import { AuthApiError, login } from "./auth-api.js";
 
 export function LoginPage() {
-  const [notAvailable, setNotAvailable] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+      navigate("/");
+    },
+    onError: (error: Error) => {
+      setRequestError(
+        error instanceof AuthApiError ? error.message : "Não foi possível fazer login.",
+      );
+    },
+  });
   const {
     register,
     handleSubmit,
@@ -18,16 +34,19 @@ export function LoginPage() {
 
   return (
     <AuthPageLayout title="LOGIN">
-      <p className="auth-storage-notice" role="note">
-        A autenticação ficará disponível quando o banco de dados for configurado. Nenhum dado deste
-        formulário será enviado ou armazenado nesta etapa.
-      </p>
-      {notAvailable && (
-        <p className="auth-form-error" role="status">
-          O banco de dados ainda não está configurado; não foi feito login.
+      {requestError && (
+        <p className="auth-form-error" role="alert">
+          {requestError}
         </p>
       )}
-      <form className="auth-form" noValidate onSubmit={handleSubmit(() => setNotAvailable(true))}>
+      <form
+        className="auth-form"
+        noValidate
+        onSubmit={handleSubmit((values) => {
+          setRequestError(null);
+          loginMutation.mutate(values);
+        })}
+      >
         <label>
           Usuário
           <input
@@ -51,8 +70,8 @@ export function LoginPage() {
             {errors.root.message}
           </p>
         )}
-        <button className="button button--primary" type="submit">
-          ENTRAR
+        <button className="button button--primary" disabled={loginMutation.isPending} type="submit">
+          {loginMutation.isPending ? "ENTRANDO..." : "ENTRAR"}
         </button>
       </form>
       <nav className="auth-links" aria-label="Opções da conta">

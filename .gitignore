@@ -5,6 +5,7 @@ config.php
 
 # Arquivos de banco de dados
 *.sql
+!apps/api/schema/auth.sql
 *.db
 *.sqlite
 *.sqlite3

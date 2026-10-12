@@ -1,12 +1,28 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { RegistrationInputSchema, type RegistrationInput } from "@daydreaming/shared";
 import { AuthPageLayout } from "./AuthPageLayout.js";
+import { AuthApiError, register as registerAccount } from "./auth-api.js";
 
 export function RegistrationPage() {
-  const [notAvailable, setNotAvailable] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const registrationMutation = useMutation({
+    mutationFn: registerAccount,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth-me"] });
+      navigate("/login");
+    },
+    onError: (error: Error) => {
+      setRequestError(
+        error instanceof AuthApiError ? error.message : "Não foi possível concluir o cadastro.",
+      );
+    },
+  });
   const {
     register,
     handleSubmit,
@@ -24,16 +40,19 @@ export function RegistrationPage() {
 
   return (
     <AuthPageLayout title="CADASTRO">
-      <p className="auth-storage-notice" role="note">
-        O cadastro ficará disponível quando o banco de dados for configurado. Nenhum dado deste
-        formulário será enviado ou armazenado nesta etapa.
-      </p>
-      {notAvailable && (
-        <p className="auth-form-error" role="status">
-          O banco de dados ainda não está configurado; a conta não foi criada.
+      {requestError && (
+        <p className="auth-form-error" role="alert">
+          {requestError}
         </p>
       )}
-      <form className="auth-form" noValidate onSubmit={handleSubmit(() => setNotAvailable(true))}>
+      <form
+        className="auth-form"
+        noValidate
+        onSubmit={handleSubmit((values) => {
+          setRequestError(null);
+          registrationMutation.mutate(values);
+        })}
+      >
         <label>
           Nome completo
           <input
@@ -90,8 +109,12 @@ export function RegistrationPage() {
             <span className="field-error">{errors.confirmPassword.message}</span>
           )}
         </label>
-        <button className="button button--primary" type="submit">
-          CADASTRAR
+        <button
+          className="button button--primary"
+          disabled={registrationMutation.isPending}
+          type="submit"
+        >
+          {registrationMutation.isPending ? "CADASTRANDO..." : "CADASTRAR"}
         </button>
       </form>
       <nav className="auth-links" aria-label="Opções da conta">

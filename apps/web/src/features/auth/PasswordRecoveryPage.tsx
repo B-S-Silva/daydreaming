@@ -19,12 +19,12 @@ export function PasswordRecoveryPage() {
   return (
     <AuthPageLayout title="RECUPERAR SENHA">
       <p className="auth-storage-notice" role="note">
-        A recuperação depende do banco de dados. O PHP atual não envia e-mail nem persiste tokens, e
-        esse formulário não afirma que uma mensagem foi enviada.
+        O PHP atual não envia e-mail nem persiste tokens, então a recuperação ainda não pode ser
+        concluída. Este formulário não afirma que uma mensagem foi enviada.
       </p>
       {notAvailable && (
         <p className="auth-form-error" role="status">
-          A recuperação não está disponível enquanto o banco de dados não for configurado.
+          A recuperação não está disponível: o sistema não envia e-mail nem armazena tokens.
         </p>
       )}
       <form className="auth-form" noValidate onSubmit={handleSubmit(() => setNotAvailable(true))}>
