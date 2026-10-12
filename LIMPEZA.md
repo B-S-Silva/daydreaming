@@ -6,6 +6,7 @@
 - A limpeza foi feita na branch `limpeza/agressiva`.
 - O snapshot inicial respeitou o `.gitignore`: `config.php` e os arquivos SQL já eram ignorados e continuam fora do Git. Eles foram mantidos no disco e não foram alterados.
 - Nenhum `.env` foi encontrado. Arquivos de configuração e documentação com credenciais foram preservados sem edição.
+- Documentos preservados por conterem credenciais: `README.md`, `README_COLABORADORES.md`, `README_DATABASE.md`, `README_INSTALACAO_DATABASE.md`, `COMANDOS_COLABORADORES.md`, `SETUP_COLABORADORES.md`, `INICIO_RAPIDO.md` e `INSTRUCOES_INSTALACAO.md`.
 
 ## Remoções
 
