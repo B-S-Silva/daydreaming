@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router";
 import type { Continent } from "@daydreaming/shared";
+import { PublicHeader } from "../auth/AuthPageLayout.js";
 import { getInternationalExamCatalog } from "./internationalExamsApi.js";
 
 const continentOptions: { id: Continent; label: string }[] = [
@@ -37,17 +38,7 @@ export function ExamCatalogPage() {
 
   return (
     <>
-      <header className="public-header">
-        <div className="public-header__identity">
-          <span className="public-header__status">❌ Você não está logado</span>
-          <Link className="public-header__home" to="/">
-            🏠 Página Inicial
-          </Link>
-        </div>
-        <a className="public-header__login" href="/login.php">
-          🔑 Fazer Login
-        </a>
-      </header>
+      <PublicHeader />
       <main className="catalog-page">
         <div className="content-width">
           <header className="catalog-heading">

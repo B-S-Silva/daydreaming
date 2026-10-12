@@ -2,7 +2,7 @@
 
 ## Estado e limites
 
-Fase 1 aprovada; Fase 2 em execução na branch `migracao/typescript`. O setup do monorepo está no commit `a70d363`. O primeiro módulo, shell e catálogo público de exames, está sendo migrado sem alterar PHP, credenciais ou banco.
+Fase 1 aprovada; Fase 2 em execução na branch `migracao/typescript`. O setup do monorepo está no commit `a70d363`; o módulo público está no commit `4ee7d75`. O módulo de autenticação está sendo migrado apenas no escopo permitido enquanto não há banco provisionado.
 
 O `LIMPEZA.md` referenciado no pedido não está no checkout: ele foi excluído na solicitação anterior para remover todos os Markdown exceto `README.md`; a base de conhecimento atual é `AGENTS.MD`.
 
@@ -28,10 +28,11 @@ O `LIMPEZA.md` referenciado no pedido não está no checkout: ele foi excluído 
 
 1. Branch `migracao/typescript` criada; PHP permanece intacto.
 2. Setup npm workspaces, TypeScript strict, ESLint, Prettier e Vitest concluído e commitado em `a70d363`.
-3. O catálogo público é embutido no PHP e não acessa tabelas; por isso o primeiro módulo usa um schema Zod compartilhado e endpoint estático, sem introspecção nem alteração do banco.
-4. Introspectar o schema real read-only antes de iniciar qualquer módulo que consulte dados; não executar scripts de instalação/seed, `drizzle-kit push` ou DDL.
+3. O catálogo público é embutido no PHP e não acessa tabelas; o módulo usa schema Zod compartilhado e endpoint estático, sem introspecção nem alteração do banco (`4ee7d75`).
+4. Como ainda não existe banco provisionado, o módulo de autenticação está limitado aos contratos Zod e telas React com validação local. Nenhuma credencial é enviada ou persistida; API, sessão, cadastro/login funcionais e integração real aguardam banco de desenvolvimento.
+5. Não usar armazenamento em memória como substituto de persistência e não executar setup/seed, `drizzle-kit push` ou DDL sem autorização. Introspectar metadados read-only e reconciliar schema real antes de ativar qualquer endpoint que consulte/alterar contas.
 
-**Gate do setup:** `typecheck`, lint, Prettier, testes, build e smoke test de Vite/Fastify passaram; zero vulnerabilidades no `npm audit`. O gate de conexão/schema permanece pendente até o primeiro módulo que use o banco.
+**Gate do setup e módulo público:** `typecheck`, lint, Prettier, testes, build e smoke test de Vite/Fastify passaram; zero vulnerabilidades no `npm audit`. A camada de autenticação de UI pode ser validada isoladamente; persistência, sessão e paridade de backend permanecem bloqueadas pela ausência de um banco.
 
 ### Fase 3 — módulos verticais
 
@@ -66,7 +67,7 @@ schema real/fixtures
 - Não converter a sessão para JWT como atalho: login PHP usa sessão server-side e logout a destrói. Manter semântica server-side com cookie HTTP-only e TTL, usando Redis como store novo, é a opção-alvo proposta.
 - `SESSION_SECRET`, Redis, domínio/path/nome de cookie, `SameSite`, CSRF e expiração devem ser configurados por ambiente e validados por HTTPS em produção.
 - Sessão nova Node não autentica PHP antigo por default. Opções a avaliar na Fase 2: migrar/cortar em conjunto login + todas as páginas protegidas; ou construir uma ponte de compatibilidade curta e com testes de segurança. Não parsear arquivos serializados de sessão PHP informalmente.
-- Login deve consultar a mesma `usuarios` e continuar aceitando hashes existentes. Testar pelo menos hashes bcrypt compatíveis sem incluir hash/credencial real nas fixtures; preservar `is_admin` e `ativo` de fonte servidor. Testar banimento durante sessão ativa e logout.
+- Login deve consultar a mesma `usuarios` e continuar aceitando hashes existentes. Testar pelo menos hashes bcrypt compatíveis sem incluir hash/credencial real nas fixtures; preservar `is_admin` e `ativo` de fonte servidor. Testar banimento durante sessão ativa e logout. **Bloqueado:** a base não foi provisionada; não habilitar endpoints de gravação antes de reconciliar metadados e obter ambiente de teste seguro.
 - Recuperação real (token persistido, expiração, envio, rate limit) muda o comportamento atual e requer confirmação funcional e mail provider. Até então reproduzir que a recuperação atual é simulada, sem alegar envio.
 
 ## Dados, tipos e comportamento
@@ -136,4 +137,4 @@ Use Node.js compatível com o Vite e npm workspaces. `npm install` instala as de
 
 ## Próxima fronteira de migração
 
-Após validar o módulo público, o próximo módulo é autenticação. Antes dele, preparar um ambiente seguro para capturar contratos PHP, decidir coexistência de sessões e testar hashes com dados sintéticos. Introspecção read-only é obrigatória antes de qualquer módulo que consulte MySQL. A limpeza da Fase 2 não remove PHP nem modifica schema/dados.
+As telas públicas e as telas/validações locais de autenticação já podem ser exercitadas sem persistência. Login/cadastro funcionais, recuperação por conta, sessão no servidor e todos os módulos que consultam dados ficam bloqueados até provisionar um banco de desenvolvimento. Depois disso, validar o schema por introspecção read-only, capturar contratos PHP com dados sintéticos, configurar Redis/segredos de sessão e então implementar as rotas de autenticação. Não usar armazenamento em memória como substituto temporário e não alterar o schema/dados existentes.

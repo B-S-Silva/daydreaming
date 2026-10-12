@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { PublicHeader } from "../auth/AuthPageLayout.js";
 
 const features = [
   {
@@ -41,22 +42,6 @@ const features = [
   },
 ];
 
-function PublicHeader() {
-  return (
-    <header className="public-header">
-      <div className="public-header__identity">
-        <span className="public-header__status">❌ Você não está logado</span>
-        <Link className="public-header__home" to="/">
-          🏠 Página Inicial
-        </Link>
-      </div>
-      <a className="public-header__login" href="/login.php">
-        🔑 Fazer Login
-      </a>
-    </header>
-  );
-}
-
 export function HomePage() {
   return (
     <>
@@ -78,9 +63,9 @@ export function HomePage() {
               <Link className="button button--light" to="/exames-internacionais">
                 🚀 Explorar Testes
               </Link>
-              <a className="button button--outline" href="/login.php">
+              <Link className="button button--outline" to="/login">
                 👤 Fazer Login
-              </a>
+              </Link>
             </div>
           </div>
         </section>
@@ -138,9 +123,9 @@ export function HomePage() {
               Sua aventura internacional começa aqui!
             </p>
             <div className="button-row">
-              <a className="button button--primary" href="/cadastro.php">
+              <Link className="button button--primary" to="/cadastro">
                 ✨ Criar Conta Grátis
-              </a>
+              </Link>
               <Link className="button button--secondary" to="/exames-internacionais">
                 🔍 Ver Todos os Testes
               </Link>

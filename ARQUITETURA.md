@@ -4,7 +4,7 @@
 
 Esta arquitetura registra a análise estática aprovada na Fase 1. A limpeza anterior removeu `LIMPEZA.md` quando os Markdown antigos foram excluídos. Usei `AGENTS.MD`, o `README.md` preservado e inspeção estática dos PHP, HTML, SQL e arquivos JSON atuais. PHP não está disponível e o MySQL não foi consultado; portanto, schema real, contratos em execução e paridade ainda exigem validação em ambiente seguro.
 
-Fase 2 está em andamento na branch `migracao/typescript`. O setup do monorepo está commitado e o primeiro módulo em migração é a home e o catálogo público de exames. Código PHP e banco permanecem intactos durante a migração e a comparação.
+Fase 2 está em andamento na branch `migracao/typescript`. O setup e o módulo público (home e catálogo de exames) estão commitados; as telas e os contratos locais de autenticação estão sendo preparados, mas não haverá integração de persistência enquanto o banco não existir. Código PHP e banco permanecem intactos durante a migração.
 
 ## Mapa do sistema atual
 
@@ -128,6 +128,8 @@ React Router para as páginas listadas; layout público, autenticado e admin sep
 ### Sessão e senha
 
 Recomendo sessão opaca server-side com cookie `httpOnly`, `Secure` em produção, `SameSite=Strict`/compatibilidade testada, expiração de 1h e invalidação no logout, armazenada em Redis para evitar alteração de tabela existente e suportar múltiplas instâncias. Redis é nova infraestrutura; requer disponibilidade/TTL/backup adequado e segredo de sessão. Proteger mutações com CSRF token sincronizado + validação de Origin e rate limit. Checar papel/conta ativa no servidor; não confiar em role enviada pelo cliente.
+
+Como ainda não há banco de desenvolvimento, a Fase 2 prepara somente os contratos compartilhados e as telas de autenticação com validação local. Nenhum dado é enviado ou armazenado, e não se simulam contas, login, email de recuperação ou sessão. A integração permanece bloqueada até que exista um banco isolado para introspecção read-only e testes.
 
 Senha: verificar hashes existentes em cópia sanitizada; suporte bcrypt no login Node para hashes compatíveis com PHP e estratégia sem reset obrigatório. Rehash apenas após login bem-sucedido e em transação, preservando coluna `senha` e formato até decisão/schema validado. No fluxo misto, sessões PHP/Node não compartilham estado automaticamente: manter autenticação no PHP até cutover coordenado da feature de usuários, ou implementar ponte limitada, temporária e testada; definir domínio, nome e renovação de cookie antes da Fase 2.
 
