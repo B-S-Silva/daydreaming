@@ -2,9 +2,9 @@
 
 ## Escopo e evidências
 
-Esta proposta é a Fase 1; não cria o monorepo nem modifica o runtime. A limpeza anterior removeu `LIMPEZA.md` quando os Markdown antigos foram excluídos. Usei `AGENTS.MD`, o `README.md` preservado e inspeção estática dos PHP, HTML, SQL e arquivos JSON atuais. Não foi possível executar PHP nem consultar o MySQL nesta sessão; portanto, a estrutura real do banco, os contratos em execução e a paridade devem ser validados em ambiente seguro antes da implementação.
+Esta arquitetura registra a análise estática aprovada na Fase 1. A limpeza anterior removeu `LIMPEZA.md` quando os Markdown antigos foram excluídos. Usei `AGENTS.MD`, o `README.md` preservado e inspeção estática dos PHP, HTML, SQL e arquivos JSON atuais. PHP não está disponível e o MySQL não foi consultado; portanto, schema real, contratos em execução e paridade ainda exigem validação em ambiente seguro.
 
-O repositório atual está na branch `limpeza/agressiva`; a branch `migracao/typescript` é assunto da Fase 2, somente depois da validação desta arquitetura. Código PHP deve permanecer intacto durante a migração e a comparação.
+Fase 2 está em andamento na branch `migracao/typescript`. O setup do monorepo está commitado e o primeiro módulo em migração é a home e o catálogo público de exames. Código PHP e banco permanecem intactos durante a migração e a comparação.
 
 ## Mapa do sistema atual
 

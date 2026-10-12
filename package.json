@@ -11,8 +11,8 @@
     "build": "npm run build --workspace @daydreaming/shared && npm run build --workspace @daydreaming/api && npm run build --workspace @daydreaming/web",
     "typecheck": "npm run build --workspace @daydreaming/shared && npm run typecheck --workspace @daydreaming/api && npm run typecheck --workspace @daydreaming/web",
     "lint": "eslint .",
-    "format": "prettier --write \"apps/**/*.{ts,tsx,js,html,json}\" \"packages/**/*.{ts,tsx,js,json}\" package.json tsconfig.base.json vitest.config.ts eslint.config.js .prettierrc.json ARQUITETURA.md PLANO_MIGRACAO.md",
-    "format:check": "prettier --check \"apps/**/*.{ts,tsx,js,html,json}\" \"packages/**/*.{ts,tsx,js,json}\" package.json tsconfig.base.json vitest.config.ts eslint.config.js .prettierrc.json ARQUITETURA.md PLANO_MIGRACAO.md",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,js,html,json}\" \"packages/**/*.{ts,tsx,js,json}\" package.json tsconfig.base.json vitest.config.ts eslint.config.js .prettierrc.json ARQUITETURA.md PLANO_MIGRACAO.md MIGRACAO.md",
+    "format:check": "prettier --check \"apps/**/*.{ts,tsx,js,html,json}\" \"packages/**/*.{ts,tsx,js,json}\" package.json tsconfig.base.json vitest.config.ts eslint.config.js .prettierrc.json ARQUITETURA.md PLANO_MIGRACAO.md MIGRACAO.md",
     "test": "npm run build --workspace @daydreaming/shared && vitest run"
   },
   "devDependencies": {

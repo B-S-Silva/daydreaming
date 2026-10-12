@@ -2,7 +2,7 @@
 
 ## Estado e limites
 
-Este documento contém apenas o plano da Fase 1. **A migração não começou.** Ainda não criar branch `migracao/typescript`, não instalar dependências, não escrever código da nova aplicação, não alterar PHP e não modificar schema/dados. A branch atual continua `limpeza/agressiva`. `ARQUITETURA.md` contém inventário de rotas, fontes, tabelas candidatas, discrepâncias e desenho-alvo.
+Fase 1 aprovada; Fase 2 em execução na branch `migracao/typescript`. O setup do monorepo está no commit `a70d363`. O primeiro módulo, shell e catálogo público de exames, está sendo migrado sem alterar PHP, credenciais ou banco.
 
 O `LIMPEZA.md` referenciado no pedido não está no checkout: ele foi excluído na solicitação anterior para remover todos os Markdown exceto `README.md`; a base de conhecimento atual é `AGENTS.MD`.
 
@@ -18,21 +18,20 @@ O `LIMPEZA.md` referenciado no pedido não está no checkout: ele foi excluído 
 
 ## Sequência macro e gates
 
-### Fase 1 — concluída nesta entrega: análise/projeto
+### Fase 1 — concluída e aprovada: análise/projeto
 
 - `ARQUITETURA.md`: mapa das telas, endpoints, regras, schema observado e arquitetura alvo.
 - `PLANO_MIGRACAO.md`: sequência, gates, riscos e critérios abaixo.
-- Parar aqui para validação da arquitetura. Nenhuma implementação foi iniciada.
+- A arquitetura foi validada antes do início da implementação.
 
-### Fase 2 — após validação: baseline, branch e schema
+### Fase 2 — em execução: setup e módulos verticais
 
-1. Criar/check-out da branch `migracao/typescript` a partir do estado aprovado sem remover/renomear PHP. Confirmar Git limpo e nenhum segredo rastreado.
-2. Preparar banco de desenvolvimento isolado com versão/charset compatível; apontar para uma cópia com dados sintéticos. Capturar contratos/fixtures PHP antes de mudar comportamento.
-3. Introspectar schema real read-only (tabelas, colunas, índices, constraints, charset, tipos DECIMAL/datas). Registrar o snapshot sem dados pessoais; reconciliar nomes divergentes com runtime real.
-4. Só então montar `apps/web`, `apps/api`, `packages/shared`, workspace pnpm, TypeScript strict, ESLint, Prettier, Vitest. Configurar checks CI básicos.
-5. Configurar Drizzle/mysql2 com schema introspectado; bloquear `push`/DDL. Escrever smoke/read-only repository tests para confirmar SELECT e parâmetros em DB sintético.
+1. Branch `migracao/typescript` criada; PHP permanece intacto.
+2. Setup npm workspaces, TypeScript strict, ESLint, Prettier e Vitest concluído e commitado em `a70d363`.
+3. O catálogo público é embutido no PHP e não acessa tabelas; por isso o primeiro módulo usa um schema Zod compartilhado e endpoint estático, sem introspecção nem alteração do banco.
+4. Introspectar o schema real read-only antes de iniciar qualquer módulo que consulte dados; não executar scripts de instalação/seed, `drizzle-kit push` ou DDL.
 
-**Gate:** os serviços conectam ao DB alvo correto, nenhum DDL foi emitido, snapshot documentado, `typecheck`/lint/test passam, PHP continua executável em paralelo.
+**Gate do setup:** `typecheck`, lint, Prettier, testes, build e smoke test de Vite/Fastify passaram; zero vulnerabilidades no `npm audit`. O gate de conexão/schema permanece pendente até o primeiro módulo que use o banco.
 
 ### Fase 3 — módulos verticais
 
@@ -117,9 +116,9 @@ Definir schema Zod de configuração na inicialização e falhar rápido se obri
 - Vite: `VITE_API_BASE_URL` (não colocar credenciais ou segredos no prefixo VITE).
 - SMTP não incluído enquanto recuperação de senha continuar simulada. Se houver decisão de implementar, adicionar configuração do provider/SMTP com secret store e testes específicos como mudança funcional separada.
 
-## Como será executado após validação
+## Como executar o estado atual
 
-Os comandos exatos e versões serão definidos no commit bootstrap da Fase 2. Contrato esperado no futuro: instalação via pnpm; `dev` inicia Vite e API com env local não versionado; `typecheck`, `lint`, `test` são obrigatórios; produção constrói front estático e API Node independente atrás de proxy TLS, apontando para o MySQL existente e Redis de sessão. Não usar nenhum comando agora, antes da validação arquitetural. Documentar `.env.example` sem segredos e configurar secrets do ambiente de deploy.
+Use Node.js compatível com o Vite e npm workspaces. `npm install` instala as dependências; `npm run dev` inicia Vite, API e watcher do pacote shared. Verificações: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test` e `npm run build`. Para produção, `npm run build`, sirva `apps/web/dist` por um servidor estático e inicie a API com `npm run start --workspace @daydreaming/api`; configure o proxy reverso para `/api` e defina `API_PORT` se diferente de 3001. Nenhuma variável de banco, Redis ou segredo é usada pelo módulo público atual.
 
 ## Checklist para desligar PHP com segurança
 
@@ -135,6 +134,6 @@ Os comandos exatos e versões serão definidos no commit bootstrap da Fase 2. Co
 - [ ] Cutover pode ser revertido para PHP sem perda de sessões/dados; janela e responsável definidos.
 - [ ] Só após aceite e rollback ensaiado: parar PHP, verificar logs/erros e monitorar o novo runtime.
 
-## Aprovação necessária para seguir
+## Próxima fronteira de migração
 
-Esta entrega para no fim da Fase 1. A Fase 2 só começa depois da validação desta arquitetura e das decisões sobre acesso a schema de desenvolvimento, sessão coexistente e semântica divergente de pontuação/auth. Nenhuma branch `migracao/typescript` ou código TypeScript foi criado nesta fase.
+Após validar o módulo público, o próximo módulo é autenticação. Antes dele, preparar um ambiente seguro para capturar contratos PHP, decidir coexistência de sessões e testar hashes com dados sintéticos. Introspecção read-only é obrigatória antes de qualquer módulo que consulte MySQL. A limpeza da Fase 2 não remove PHP nem modifica schema/dados.
