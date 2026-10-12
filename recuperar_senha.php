@@ -57,7 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="public/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Recuperar Senha</title>
-    <script src="public/js/main.js?v=1"></script>
     <style>
         .message {
             background-color: rgba(46, 204, 113, 0.2);

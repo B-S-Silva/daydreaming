@@ -100,8 +100,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="public/css/style.css">
     <title>Formulário de Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="public/js/main.js?v=1"></script>
-    
     <style>
         body {
             background: linear-gradient(135deg, #187bcb 0%, #6c5ce7 100%) !important;

@@ -95,8 +95,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="public/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Cadastro de Usuário</title>
-    <script src="public/js/main.js?v=1"></script>
-
 </head>
 <body>
     <?php include 'header_status.php'; ?>

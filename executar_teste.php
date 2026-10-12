@@ -403,6 +403,5 @@ if (isset($_GET['executando']) && isset($_GET['sessao'])) {
         </div>
     </div>
     
-    <script src="public/js/main.js"></script>
 </body>
 </html>

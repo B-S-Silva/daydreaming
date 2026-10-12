@@ -527,7 +527,6 @@ function obterNivelDesempenho($pontuacao) {
         </div>
     </div>
     
-    <script src="public/js/main.js"></script>
     <script>
         function aplicarFiltros() {
             const tipo = document.getElementById('filtro-tipo').value;
