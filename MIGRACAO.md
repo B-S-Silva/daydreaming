@@ -4,27 +4,33 @@
 
 Fase 2 está em andamento na branch `migracao/typescript`. O código PHP e o banco continuam preservados. Setup do monorepo: commit `a70d363`; primeiro módulo: home e conteúdo público de exames internacionais.
 
-| Módulo | Estado | Implementação |
-| --- | --- | --- |
-| Setup | Concluído | npm workspaces, TypeScript strict, ESLint, Prettier, Vitest, Vite, React Router, TanStack Query e Fastify. |
-| Home e catálogo público | Migrado | Home React; catálogo público em `/exames-internacionais`; endpoint `GET /api/public/international-exams`; tipos e schemas Zod compartilhados; filtros, conteúdo de 14 países, seis exames e dicas. |
-| Autenticação e usuários | Pendente | Requer contratos PHP, teste de bcrypt e desenho aprovado de sessão coexistente. |
-| Administração, fórum, simuladores e histórico | Pendente | Dependem de autenticação, introspecção read-only do MySQL e fixtures de paridade. |
+| Módulo                                        | Estado               | Implementação                                                                                                                                                                                      |
+| --------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Setup                                         | Concluído            | npm workspaces, TypeScript strict, ESLint, Prettier, Vitest, Vite, React Router, TanStack Query e Fastify.                                                                                         |
+| Home e catálogo público                       | Migrado              | Home React; catálogo público em `/exames-internacionais`; endpoint `GET /api/public/international-exams`; tipos e schemas Zod compartilhados; filtros, conteúdo de 14 países, seis exames e dicas. |
+| Autenticação e usuários                       | Migrado parcialmente | Login, cadastro, sessão MySQL, CSRF, logout e telas React; recuperação real e compatibilidade da sessão PHP continuam pendentes.                                                                   |
+| Administração, fórum, simuladores e histórico | Pendente             | Dependem de autenticação, introspecção read-only do MySQL e fixtures de paridade.                                                                                                                  |
 
-O catálogo PHP é conteúdo estático e não consulta banco. Por isso este módulo não criou tabelas nem conectou Drizzle/MySQL. O endpoint fornece ao React o mesmo conteúdo que estava embutido em `testes_internacionais.php`.
+O catálogo PHP é conteúdo estático e não consulta banco. Por isso o módulo público não criou tabelas nem conectou Drizzle/MySQL. A autenticação usa Drizzle com driver `mysql2` para `usuarios`, `logs_acesso` e `logs_sistema`, e uma tabela isolada `node_sessions`; nenhuma tabela ou dado PHP foi alterado. A sessão armazena somente o hash do token aleatório e expira em uma hora por padrão.
+
+Login, cadastro e recuperação têm rate limits por IP (respectivamente 5, 3 e 3 requisições por minuto). O armazenamento do limiter é local ao processo; não execute múltiplas instâncias sem configurar um store compartilhado.
 
 ## Diferenças e limites conhecidos
 
-- O header novo informa sempre que o visitante não está logado. O PHP detecta a sessão; `/auth/me` só será migrado no módulo de autenticação.
+- O header novo consulta `/api/auth/me`; a sessão Node não autentica as páginas PHP. O corte das páginas protegidas exige migração coordenada.
+- Após login administrativo, o SPA ainda direciona à home, não ao `admin_forum.php` do PHP, porque o módulo admin e a ponte de sessão não foram migrados.
 - Para visitantes, os botões de simulador preservam o alerta e a confirmação de login. A navegação do usuário autenticado ao simulador ainda não é representada nesta etapa.
-- Login, cadastro, fórum e simuladores apontam para as páginas PHP existentes durante a coexistência; esses módulos não foram migrados.
+- Fórum e simuladores continuam apontando para as páginas PHP existentes durante a coexistência; esses módulos não foram migrados.
 - A rota React do catálogo é `/exames-internacionais`; a URL PHP `/testes_internacionais.php` permanece ativa no sistema antigo.
-- Não houve comparação automatizada com PHP: o runtime PHP não está disponível neste ambiente. Conteúdo e mensagens foram transcritos da implementação estática.
+- Não houve comparação automatizada com PHP: o runtime PHP não está disponível neste ambiente. Regras e mensagens de autenticação foram transcritas da implementação estática e cobertas com testes sintéticos; validação de hashes de contas reais deve ocorrer em ambiente isolado.
+- Recuperação de senha continua sem envio de email nem persistência de token; a API retorna indisponibilidade explicitamente e a tela não alega que um email foi enviado.
 
 ## Variáveis de ambiente
 
 - `API_PORT` (opcional): porta da API; padrão `3001`.
-- O módulo público não lê credenciais, banco, Redis ou variáveis `VITE_*`. Variáveis futuras de DB e sessão serão documentadas quando seus módulos forem iniciados.
+- `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_CHARSET`: conexão da API ao schema de desenvolvimento. Usuário/senha são obrigatórios; não grave valores reais no repositório.
+- `SESSION_TTL_SECONDS` (padrão `3600`), `COOKIE_SECURE` (padrão `true` em produção) e `WEB_ORIGIN` (padrão `http://localhost:5173`).
+- A credencial MySQL de desenvolvimento usada no provisionamento tem privilégios amplos e deve ser substituída por uma credencial de menor privilégio antes de qualquer uso em produção.
 
 ## Como executar
 
@@ -45,14 +51,14 @@ npm test
 npm run build
 ```
 
-Em produção, execute `npm run build`, sirva `apps/web/dist` como conteúdo estático e inicie a API com `npm run start --workspace @daydreaming/api`. Configure um proxy reverso para `/api` apontando à API, e fallback do servidor estático para `index.html` nas rotas React. Nenhuma migração ou comando DDL é necessário.
+Em produção, execute `npm run build`, sirva `apps/web/dist` como conteúdo estático e inicie a API com `npm run start --workspace @daydreaming/api`. Configure um proxy reverso para `/api` apontando à API, e fallback do servidor estático para `index.html` nas rotas React. Configure as variáveis de MySQL e sessão descritas acima; a API falha ao iniciar se não conseguir conectar ao banco.
 
 ## Critérios antes de desligar o PHP
 
-- [x] Migrar e aceitar paridade de todos os módulos ainda pendentes, inclusive login, sessão, cadastro, admin, fórum, simulados, resultados e histórico.
-- [x] Introspectar o banco correto em modo read-only e confirmar que nenhum DDL foi executado.
-- [x] Comparar mensagens, status, redirects, respostas, regras e limites com fixtures PHP em ambiente seguro.
-- [x] Validar cookies, CSRF, CORS, rate limit, autorização, uploads, logs e secrets.
-- [x] Confirmar jobs externos, cron, webhooks e scripts operacionais; bloquear operações destrutivas públicas.
-- [x] Testar staging, observabilidade, backups, rollback e cutover reversível sem perda de dados ou sessões.
-- [x] Remover o PHP somente após aceite de paridade e ensaio de rollback.
+- [ ] Migrar e aceitar paridade de todos os módulos ainda pendentes, inclusive admin, fórum, simulados, resultados e histórico.
+- [ ] Introspectar os schemas restantes e confirmar que tabelas/dados PHP não foram alterados.
+- [ ] Comparar mensagens, status, redirects, respostas, regras e limites com fixtures PHP em ambiente seguro.
+- [ ] Validar cookies, CSRF, CORS, rate limit, autorização, uploads, logs e secrets.
+- [ ] Confirmar jobs externos, cron, webhooks e scripts operacionais; bloquear operações destrutivas públicas.
+- [ ] Testar staging, observabilidade, backups, rollback e cutover reversível sem perda de dados ou sessões.
+- [ ] Remover o PHP somente após aceite de paridade e ensaio de rollback.
