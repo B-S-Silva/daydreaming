@@ -12,7 +12,7 @@ Fase 2 está em andamento na branch `migracao/typescript`. O código PHP e o ban
 | Administração/importação de questões | Migrado parcialmente | APIs admin de estatísticas, exemplo JSON e importação multipart JSON/XML; tela React; tabela nova `questoes` no banco de desenvolvimento; testes sintéticos. Paridade PHP ao vivo pendente.                               |
 | Fórum e moderação                    | Migrado parcialmente | Endpoints autenticados para categorias, tópicos, respostas, curtidas, moderação, admin de usuários e auditoria; páginas React `/forum` e `/admin/forum`; 5 tabelas novas vazias; testes sintéticos. PHP ao vivo pendente. |
 | Simulados e respostas                | Migrado parcialmente | Catálogo, início/retomada, cronômetro, navegação, salvamento incremental e finalização em React/API; três tabelas novas vazias; testes sintéticos. Não há questões ativas no banco.                                       |
-| Resultados, revisão e histórico      | Pendente             | A tabela de resultados foi criada para a finalização; telas, consultas, revisão e histórico serão migrados na próxima etapa.                                                                                              |
+| Resultados, revisão e histórico      | Migrado parcialmente | APIs autenticadas, schemas compartilhados e páginas de resultado, revisão e ambos os históricos; testes de contrato e UI. Sem DDL/seed; paridade PHP ao vivo pendente.                                                    |
 
 O catálogo PHP é conteúdo estático e não consulta banco. Por isso o módulo público não criou tabelas nem conectou Drizzle/MySQL. A autenticação usa Drizzle com driver `mysql2` para `usuarios`, `logs_acesso` e `logs_sistema`, e uma tabela isolada `node_sessions`; nenhuma tabela ou dado PHP foi alterado. A sessão armazena somente o hash do token aleatório e expira em uma hora por padrão.
 
@@ -28,6 +28,12 @@ O módulo de simulados usa `GET /api/simulator/dashboard`, `POST /api/simulator/
 
 O cálculo incremental de dissertativas preserva a aceitação de resposta esperada contida no texto; o cálculo final do PHP compara apenas igualdade após normalização, e essa divergência foi mantida. Também foi preservado `total_questoes = 120` ao persistir resultado, inclusive para outras provas. Os cartões e a execução PHP têm contagens divergentes para DELE, DELF, TestDaF, JLPT e HSK; a API preserva ambos os valores usados em cada tela. A tela antiga consultava badges, mas as tabelas não existem e o serviço de concessão foi removido; gamificação ficou explicitamente fora deste módulo.
 
+O módulo de resultados usa `GET /api/results/:id`, `GET /api/results/:id/review`, `GET /api/results/history/tests` e `GET /api/results/history/sessions`. As páginas correspondentes são `/resultados/:id`, `/resultados/:id/revisao`, `/historico/testes` e `/historico/provas`. Sessões e resultados são sempre limitados ao usuário autenticado; revisão retorna questões do tipo da prova e respostas da sessão. Resultado sem linha em `resultados_testes` usa `pontuacao_final` da sessão e zera os demais campos, conforme `resultado_teste.php`. Os resumos de histórico mantêm as métricas distintas dos dois PHP: média de `resultados_testes.pontuacao` para histórico de testes e média `acertos / denominador fixo por prova` para histórico de sessões. Nenhuma tabela ou dado foi alterado nesta etapa.
+
+O PHP consulta `$_SESSION['user_id']` em `historico_testes.php`, embora o login grave `usuario_id`; o endpoint TS usa o ID verificado da sessão Node e corrige essa inconsistência para que o histórico funcione. Os filtros de tipo/período são preservados na URL e na interface, mas continuam sem efeito, como no PHP. A seção de badges não foi reintroduzida. Tipos de prova desconhecidos seguem com identificação visual SAT nas telas de resultado/revisão; a apresentação de GRE passou a usar a configuração válida do simulador em vez do índice PHP ausente.
+
+As mensagens de erro/redirect das páginas PHP foram convertidas em estados HTTP 404/401 e links no SPA. Formatação de datas é feita no fuso do navegador (o PHP usa o fuso do servidor), e não houve execução PHP para comparação ao vivo. O banco não tem resultados nem questões ativas, portanto as telas foram validadas com respostas sintéticas, sem smoke integrado de dados.
+
 Login, cadastro e recuperação têm rate limits por IP (respectivamente 5, 3 e 3 requisições por minuto). O armazenamento do limiter é local ao processo; não execute múltiplas instâncias sem configurar um store compartilhado.
 
 ## Diferenças e limites conhecidos
@@ -42,7 +48,7 @@ Login, cadastro e recuperação têm rate limits por IP (respectivamente 5, 3 e 
 - O PHP dá rate limit apenas a POSTs de `admin_forum.php` com estado de sessão; o API rate limiter atual é por IP e memória do processo. A escrita de curtidas/moderação/admin usa contratos JSON em vez de redirects e mensagens de flash do PHP.
 - A API impede que um administrador altere a própria conta (PHP permitia essas ações); categoria inválida/cor é rejeitada no schema em vez de depender apenas do banco. A ordenação das categorias e do painel admin foi alinhada às consultas PHP.
 - A API não envia gabaritos ao navegador, ao contrário de `executar_teste.php`; enunciados e alternativas são renderizados como texto escapado em React, enquanto o PHP interpreta HTML embutido. O autosave exige CSRF no Node; `salvar_resposta.php` não faz essa checagem.
-- A tela migrada mostra o resumo logo após finalizar. Reabrir uma sessão já finalizada e telas de resultado detalhado, revisão e histórico ficam para o próximo módulo; atualmente a base não tem questões ativas para validar uma prova completa com dados reais.
+- A tela migrada mostra o resumo logo após finalizar e oferece o link para o resultado persistido, revisão e histórico. Reabrir uma sessão já finalizada dentro do runner não foi alterado; a base não tem questões ativas para validar uma prova completa com dados reais.
 - O painel novo mantém os principais filtros/ações mas apresenta categorias vazias (sem seed) até o admin criá-las. A documentação e os SQL PHP divergem sobre `forum_likes`/`forum_curtidas`, colunas de autor e logs; a aplicação implementada segue `forum_curtidas` e o esquema novo compatível.
 - A rota React do catálogo é `/exames-internacionais`; a URL PHP `/testes_internacionais.php` permanece ativa no sistema antigo.
 - Não houve comparação automatizada com PHP: o runtime PHP não está disponível neste ambiente. Regras e mensagens de autenticação foram transcritas da implementação estática e cobertas com testes sintéticos; validação de hashes de contas reais deve ocorrer em ambiente isolado.
@@ -78,7 +84,7 @@ Em produção, execute `npm run build`, sirva `apps/web/dist` como conteúdo est
 
 ## Próxima etapa
 
-Concluir os gates e revisar o diff do fórum antes do commit isolado. A próxima fronteira é simulado e respostas, iniciando por introspecção somente de leitura de `sessoes_teste`, `respostas_usuario` e `resultados_testes`. PHP permanece intacto.
+Executar os gates finais do módulo de resultados e criar seu commit isolado. Em seguida, validar paridade e fluxos integrados em ambiente PHP controlado, preparar hardening/cutover e manter o PHP intacto até aceite explícito.
 
 ## Critérios antes de desligar o PHP
 

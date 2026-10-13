@@ -14,6 +14,12 @@ import {
   SimulatorOverviewPage,
   SimulatorSessionPage,
 } from "./features/simulators/SimulatorPages.js";
+import {
+  SessionHistoryPage,
+  TestHistoryPage,
+  TestResultPage,
+  TestReviewPage,
+} from "./features/results/ResultsPages.js";
 import "./styles.css";
 
 export function App() {
@@ -42,6 +48,10 @@ export function App() {
           <Route path="/simulador" element={<SimulatorCatalogPage />} />
           <Route path="/simulador/:tipo" element={<SimulatorOverviewPage />} />
           <Route path="/simulador/sessoes/:id" element={<SimulatorSessionPage />} />
+          <Route path="/resultados/:id" element={<TestResultPage />} />
+          <Route path="/resultados/:id/revisao" element={<TestReviewPage />} />
+          <Route path="/historico/testes" element={<TestHistoryPage />} />
+          <Route path="/historico/provas" element={<SessionHistoryPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </BrowserRouter>

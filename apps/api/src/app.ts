@@ -10,19 +10,22 @@ import type { ForumRouteOptions } from "./forum/forum-routes.js";
 import { registerForumRoutes } from "./forum/forum-routes.js";
 import type { SimulatorRouteOptions } from "./simulators/simulator-routes.js";
 import { registerSimulatorRoutes } from "./simulators/simulator-routes.js";
+import type { ResultsRouteOptions } from "./results/results-routes.js";
+import { registerResultsRoutes } from "./results/results-routes.js";
 
 export interface CreateAppOptions {
   auth?: AuthRouteOptions;
   questions?: QuestionRouteOptions;
   forum?: ForumRouteOptions;
   simulator?: SimulatorRouteOptions;
+  results?: ResultsRouteOptions;
   logger?: boolean;
 }
 
 export function createApp(options: CreateAppOptions = {}) {
   const app = Fastify({ logger: options.logger ?? false });
 
-  if (options.auth || options.questions || options.forum || options.simulator) {
+  if (options.auth || options.questions || options.forum || options.simulator || options.results) {
     app.register(rateLimit, {
       global: false,
       errorResponseBuilder: (_request, context) =>
@@ -41,7 +44,7 @@ export function createApp(options: CreateAppOptions = {}) {
     return reply.code(200).send(getInternationalExamCatalog());
   });
 
-  if (options.auth || options.questions || options.forum || options.simulator) {
+  if (options.auth || options.questions || options.forum || options.simulator || options.results) {
     app.register(async (authApp) => {
       if (options.auth) {
         registerAuthRoutes(authApp, options.auth);
@@ -54,6 +57,9 @@ export function createApp(options: CreateAppOptions = {}) {
       }
       if (options.simulator) {
         registerSimulatorRoutes(authApp, options.simulator);
+      }
+      if (options.results) {
+        registerResultsRoutes(authApp, options.results);
       }
     });
   }

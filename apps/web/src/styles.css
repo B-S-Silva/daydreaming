@@ -32,6 +32,428 @@ select {
   margin: 0 auto;
 }
 
+.results-page {
+  padding: 36px 0 64px;
+}
+
+.results-heading,
+.result-summary > header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.results-heading h1,
+.result-summary h1 {
+  margin: 0 0 8px;
+}
+
+.results-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.results-stats article,
+.review-question,
+.history-list,
+.history-badges,
+.session-history,
+.result-summary,
+.history-type-card {
+  padding: 20px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 10px #00000012;
+}
+
+.results-stats article {
+  text-align: center;
+}
+
+.results-stats h2,
+.results-stats h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.results-stats p {
+  margin: 0;
+  color: var(--result-color, #667eea);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.results-stats small {
+  color: #666;
+}
+
+.result-summary {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 32px;
+}
+
+.result-summary h2 {
+  margin: 0;
+}
+
+.result-summary__score {
+  margin: 12px 0;
+  color: var(--result-color);
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.history-by-type {
+  margin: 28px 0;
+}
+
+.history-by-type > h2 {
+  text-align: center;
+}
+
+.history-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+}
+
+.history-type-card {
+  color: #fff;
+  background: var(--result-color);
+  text-align: center;
+}
+
+.history-type-card > span {
+  font-size: 2rem;
+}
+
+.history-type-card h3,
+.history-type-card p {
+  margin: 8px 0;
+}
+
+.history-type-card p {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.history-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(230px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.history-list h2,
+.history-badges h2 {
+  margin-top: 0;
+}
+
+.history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f4f5f8;
+}
+
+.history-filters label {
+  display: grid;
+  flex: 1 1 150px;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.history-filters select {
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+}
+
+.test-history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.test-history-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-left: 4px solid var(--result-color);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 7px #00000010;
+  text-decoration: none;
+}
+
+.test-history-item__icon {
+  font-size: 1.8rem;
+}
+
+.test-history-item__details,
+.test-history-item__score {
+  display: grid;
+  gap: 2px;
+}
+
+.test-history-item__details {
+  flex: 1;
+}
+
+.test-history-item__details small,
+.test-history-item__score small {
+  color: #666;
+}
+
+.test-history-item__score {
+  text-align: right;
+}
+
+.test-history-item__score strong {
+  color: var(--result-color);
+}
+
+.test-history-item__score small {
+  padding: 2px 6px;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.results-empty {
+  padding: 36px 20px;
+  border-radius: 10px;
+  background: #fff;
+  color: #666;
+  text-align: center;
+}
+
+.results-empty > span {
+  font-size: 3rem;
+}
+
+.history-note {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.review-summary {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.review-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  gap: 20px;
+  align-items: start;
+}
+
+.review-questions {
+  display: grid;
+  gap: 16px;
+}
+
+.review-question {
+  scroll-margin-top: 80px;
+}
+
+.review-question > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.review-question h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.review-question__prompt {
+  white-space: pre-wrap;
+}
+
+.review-status {
+  flex: none;
+  font-weight: 700;
+}
+
+.review-status--empty,
+.review-nav__item--empty {
+  color: #777;
+}
+
+.review-status--correct,
+.review-nav__item--correct {
+  color: #188038;
+}
+
+.review-status--wrong,
+.review-nav__item--wrong {
+  color: #b3261e;
+}
+
+.review-options {
+  display: grid;
+  gap: 8px;
+}
+
+.review-option {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.review-option--selected {
+  border-color: #667eea;
+  background: #667eea12;
+}
+
+.review-option--correct {
+  border-color: #188038;
+  background: #18803812;
+}
+
+.review-option--wrong {
+  border-color: #b3261e;
+  background: #b3261e10;
+}
+
+.review-option small {
+  grid-column: 2;
+}
+
+.review-essay {
+  padding: 14px;
+  border-radius: 6px;
+  background: #f4f5f8;
+}
+
+.review-essay h3 {
+  margin: 8px 0;
+}
+
+.review-essay p {
+  white-space: pre-wrap;
+}
+
+.review-nav {
+  position: sticky;
+  top: 80px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 3px 10px #00000012;
+}
+
+.review-nav h2 {
+  width: 100%;
+  margin: 0 0 6px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.review-nav__item {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.results-actions {
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.session-history {
+  margin-top: 24px;
+}
+
+.session-history h2 {
+  margin-top: 0;
+}
+
+.session-history__scroll {
+  overflow-x: auto;
+}
+
+.session-history table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+.session-history th,
+.session-history td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.session-history th {
+  background: #f4f5f8;
+}
+
+.session-exam-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 16px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.session-score--excellent {
+  color: #188038;
+}
+
+.session-score--good {
+  color: #d87900;
+}
+
+.session-score--regular {
+  color: #b3261e;
+}
+
+@media (max-width: 760px) {
+  .history-columns,
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .review-nav {
+    position: static;
+    grid-row: 1;
+  }
+
+  .test-history-item {
+    flex-wrap: wrap;
+  }
+
+  .test-history-item__score {
+    width: 100%;
+    text-align: left;
+  }
+}
+
 .public-header {
   position: sticky;
   z-index: 5;

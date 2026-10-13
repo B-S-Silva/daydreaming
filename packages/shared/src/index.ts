@@ -393,6 +393,114 @@ export type SimulatorDashboardResponse = z.infer<typeof SimulatorDashboardRespon
 export type SimulatorSessionResponse = z.infer<typeof SimulatorSessionResponseSchema>;
 export type SimulatorFinishResponse = z.infer<typeof SimulatorFinishResponseSchema>;
 
+export const TestResultResponseSchema = z.object({
+  sessao_id: z.number().int().positive(),
+  tipo_prova: z.string(),
+  nome: z.string(),
+  cor: z.string(),
+  pontuacao: z.number(),
+  acertos: z.number().int().nonnegative(),
+  total_questoes: z.number().int().nonnegative(),
+  questoes_respondidas: z.number().int().nonnegative(),
+  tempo_gasto: z.number().int().nonnegative(),
+});
+
+export const TestReviewQuestionSchema = z.object({
+  id: z.number().int().positive(),
+  numero_questao: z.number().int().positive(),
+  enunciado: z.string(),
+  tipo_questao: z.string().nullable(),
+  alternativas: z.record(z.string(), z.string()),
+  resposta_correta: z.string().nullable(),
+  resposta_dissertativa: z.string().nullable(),
+  materia: z.string().nullable(),
+  assunto: z.string().nullable(),
+  resposta_usuario: z.string().nullable(),
+  resposta_dissertativa_usuario: z.string().nullable(),
+  esta_correta: z.boolean().nullable(),
+});
+
+export const TestReviewResponseSchema = z.object({
+  session: z.object({
+    sessao_id: z.number().int().positive(),
+    tipo_prova: z.string(),
+    nome: z.string(),
+    cor: z.string(),
+    inicio: z.string(),
+    pontuacao: z.number(),
+    acertos: z.number().int().nonnegative(),
+    questoes_respondidas: z.number().int().nonnegative(),
+    tempo_gasto: z.number().int().nonnegative(),
+  }),
+  questions: z.array(TestReviewQuestionSchema),
+});
+
+export const TestHistoryItemSchema = z.object({
+  sessao_id: z.number().int().positive(),
+  tipo_prova: z.string(),
+  nome: z.string(),
+  cor: z.string(),
+  icone: z.string(),
+  data_realizacao: z.string(),
+  acertos: z.number().int().nonnegative(),
+  total_questoes: z.number().int().nonnegative(),
+  tempo_gasto: z.number().int().nonnegative(),
+  pontuacao: z.number(),
+});
+
+export const TestHistoryResponseSchema = z.object({
+  items: z.array(TestHistoryItemSchema),
+  stats: z.object({
+    total_testes: z.number().int().nonnegative(),
+    media_geral: z.number(),
+    melhor_pontuacao: z.number(),
+    testes_aprovados: z.number().int().nonnegative(),
+  }),
+  by_type: z.array(
+    z.object({
+      tipo_prova: z.string(),
+      nome: z.string(),
+      cor: z.string(),
+      icone: z.string(),
+      media_pontuacao: z.number(),
+      testes_por_tipo: z.number().int().nonnegative(),
+    }),
+  ),
+});
+
+export const SessionHistoryItemSchema = z.object({
+  sessao_id: z.number().int().positive(),
+  tipo_prova: z.string(),
+  nome: z.string(),
+  cor: z.string(),
+  inicio: z.string(),
+  fim: z.string().nullable(),
+  status: z.string(),
+  pontuacao_final: z.number(),
+  acertos: z.number().int().nonnegative(),
+  questoes_respondidas: z.number().int().nonnegative(),
+  tempo_gasto: z.number().int().nonnegative(),
+  duracao_minutos: z.number().int().nonnegative(),
+  total_questoes: z.number().int().nonnegative(),
+  pontuacao_calculada: z.number(),
+});
+
+export const SessionHistoryResponseSchema = z.object({
+  items: z.array(SessionHistoryItemSchema),
+  stats: z.object({
+    total_provas: z.number().int().nonnegative(),
+    questoes_respondidas: z.number().int().nonnegative(),
+    acertos: z.number().int().nonnegative(),
+    tempo_total: z.number().int().nonnegative(),
+    media_pontuacao: z.number(),
+  }),
+});
+
+export type TestResultResponse = z.infer<typeof TestResultResponseSchema>;
+export type TestReviewResponse = z.infer<typeof TestReviewResponseSchema>;
+export type TestHistoryResponse = z.infer<typeof TestHistoryResponseSchema>;
+export type SessionHistoryResponse = z.infer<typeof SessionHistoryResponseSchema>;
+
 const PhpTrimmedForumStringSchema = z.string().transform(trimPhpInput);
 const RequiredForumStringSchema = PhpTrimmedForumStringSchema.refine((value) => !isPhpEmpty(value));
 

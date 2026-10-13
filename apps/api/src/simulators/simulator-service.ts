@@ -184,6 +184,25 @@ const exams = [
   },
 ] satisfies SimulatorExam[];
 
+export function getSimulatorExamDisplay(
+  rawType: string,
+): Pick<SimulatorExam, "nome" | "cor" | "icone"> {
+  const exam =
+    exams.find((item) => item.tipo_prova === rawType) ??
+    exams.find((item) => item.tipo_prova === "sat")!;
+  return { nome: exam.nome, cor: exam.cor, icone: exam.icone };
+}
+
+export function getResultExamDisplay(rawType: string): Pick<SimulatorExam, "nome" | "cor"> {
+  const legacyDisplays: Record<string, Pick<SimulatorExam, "nome" | "cor">> = {
+    sat: { nome: "SAT", cor: "#FF9800" },
+    toefl: { nome: "TOEFL", cor: "#2196F3" },
+    ielts: { nome: "IELTS", cor: "#4CAF50" },
+    gre: { nome: "GRE", cor: "#9C27B0" },
+  };
+  return legacyDisplays[rawType] ?? legacyDisplays.sat!;
+}
+
 function findExam(rawType: unknown): SimulatorExam {
   const parsed = SimulatorExamTypeSchema.safeParse(rawType);
   const exam = parsed.success ? exams.find((item) => item.tipo_prova === parsed.data) : undefined;

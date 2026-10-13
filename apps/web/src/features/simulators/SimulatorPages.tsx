@@ -329,6 +329,12 @@ export function SimulatorSessionPage() {
             <p>Questões respondidas: {finishMutation.data.questoes_respondidas}</p>
             <p>Acertos: {finishMutation.data.acertos}</p>
             <p>Pontuação: {finishMutation.data.pontuacao.toFixed(1)}%</p>
+            <Link className="button button--primary" to={`/resultados/${session.sessao_id}`}>
+              Ver resultado e revisão
+            </Link>
+            <Link className="button button--secondary" to="/historico/provas">
+              Histórico de provas
+            </Link>
             <Link className="button button--primary" to="/simulador">
               Voltar ao simulador
             </Link>

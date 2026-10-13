@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AuthRepository } from "../auth/auth-repository.js";
 import { createApp } from "../app.js";
+import { getResultExamDisplay, getSimulatorExamDisplay } from "./simulator-service.js";
 import type { SimulatorQuestionRecord, SimulatorRepository } from "./simulator-service.js";
 
 const sessionToken = "a".repeat(64);
@@ -92,6 +93,14 @@ afterEach(() => {
 });
 
 describe("simulator routes", () => {
+  it("keeps the distinct exam colors used by PHP result and test-history pages", () => {
+    expect(getResultExamDisplay("toefl")).toEqual({ nome: "TOEFL", cor: "#2196F3" });
+    expect(getResultExamDisplay("ielts")).toEqual({ nome: "IELTS", cor: "#4CAF50" });
+    expect(getSimulatorExamDisplay("toefl")).toMatchObject({ cor: "#4CAF50" });
+    expect(getSimulatorExamDisplay("ielts")).toMatchObject({ cor: "#2196F3" });
+    expect(getResultExamDisplay("dele")).toEqual({ nome: "SAT", cor: "#FF9800" });
+  });
+
   it("requires an authenticated session for the dashboard and returns exam statistics", async () => {
     const { app, headers } = createSimulatorApp();
     const denied = await app.inject({ method: "GET", url: "/api/simulator/dashboard" });
