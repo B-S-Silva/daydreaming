@@ -4,16 +4,19 @@ import { AuthErrorResponseSchema, HealthResponseSchema } from "@daydreaming/shar
 import type { AuthRouteOptions } from "./auth/auth-routes.js";
 import { registerAuthRoutes } from "./auth/auth-routes.js";
 import { getInternationalExamCatalog } from "./public/international-exams.js";
+import type { QuestionRouteOptions } from "./questions/question-routes.js";
+import { registerQuestionRoutes } from "./questions/question-routes.js";
 
 export interface CreateAppOptions {
   auth?: AuthRouteOptions;
+  questions?: QuestionRouteOptions;
   logger?: boolean;
 }
 
 export function createApp(options: CreateAppOptions = {}) {
   const app = Fastify({ logger: options.logger ?? false });
 
-  if (options.auth) {
+  if (options.auth || options.questions) {
     app.register(rateLimit, {
       global: false,
       errorResponseBuilder: (_request, context) =>
@@ -32,10 +35,14 @@ export function createApp(options: CreateAppOptions = {}) {
     return reply.code(200).send(getInternationalExamCatalog());
   });
 
-  if (options.auth) {
-    const authOptions = options.auth;
+  if (options.auth || options.questions) {
     app.register(async (authApp) => {
-      registerAuthRoutes(authApp, authOptions);
+      if (options.auth) {
+        registerAuthRoutes(authApp, options.auth);
+      }
+      if (options.questions) {
+        registerQuestionRoutes(authApp, options.questions);
+      }
     });
   }
 

@@ -8,8 +8,8 @@ O `LIMPEZA.md` referenciado no pedido não está no checkout: ele foi excluído 
 
 ## Bloqueios conhecidos a resolver antes de declarar paridade
 
-1. **Schema não confiável por scripts:** arquivos PHP/SQL declaram colunas diferentes para forum, questões, sessões, logs e badges. Tabelas de autenticação/logs foram criadas e inspecionadas; tabelas dos demais módulos ainda precisam de introspecção read-only. Nenhum `setup_database.php`, `reset_database.sql`, `drizzle-kit push` ou script de correção deve ser executado.
-2. **Sessão/ID inconsistente:** login define `usuario_id`; `historico_testes.php` consulta `$_SESSION['user_id']`. O login não define `tipo_usuario`, mas `admin_questoes.php` exige `tipo_usuario === 'admin'`; validar contra ambiente de teste antes de reproduzir ou corrigir qualquer comportamento.
+1. **Schema não confiável por scripts:** arquivos PHP/SQL declaram colunas diferentes para forum, questões, sessões, logs e badges. Tabelas de autenticação/logs e a tabela nova de questões foram criadas/inspecionadas; tabelas restantes ainda precisam de introspecção read-only. Nenhum `setup_database.php`, `reset_database.sql`, `drizzle-kit push` ou script de correção deve ser executado.
+2. **Sessão/ID inconsistente:** login define `usuario_id`; `historico_testes.php` consulta `$_SESSION['user_id']`. `admin_questoes.php` exige `tipo_usuario === 'admin'`, enquanto autenticação grava `is_admin`; a API usa o papel confiável `isAdmin` da sessão Node, não um campo enviado pelo cliente.
 3. **Pontuação de dissertativa divergente:** `salvar_resposta.php` aceita igualdade ou resposta esperada contida; `processar_teste.php` só aceita igualdade normalizada. Total geral é calculado pelas respostas, mas `total_questoes` persiste constante 120. Fechamento também pode salvar respostas novamente; transação e duplicidade precisam de fixture.
 4. **Recuperação de senha não é fluxo real:** token é gerado e descartado, sem email e sem endpoint de redefinição. A paridade atual é preservar a tela/mensagem simulada, não prometer funcionalidade nova.
 5. **Sessão PHP não pode ser lida automaticamente pelo Node:** cookie e store Node já foram definidos; coexistência e cutover coordenado continuam pendentes para não desconectar usuários inadvertidamente.
@@ -44,13 +44,13 @@ Ordem sugerida — do mais isolado ao mais acoplado, com autenticação antecipa
 
 1. **Shell e conteúdo público** (`index.php`, `header_status.php`, `testes_internacionais.php`): React Router/layout; catálogo de exames estático tipado; `GET /api/auth/me` alimenta o header. Sem DB para conteúdo embutido.
 2. **Usuários e autenticação** (`login.php`, `cadastro.php`, `recuperar_senha.php`, `logout.php`, `verificar_auth.php`): APIs de login/register/me/logout, cookie e sessão em MySQL, validações compartilhadas e telas login/cadastro implementadas. Restam comparação com PHP executável, smoke com hashes reais em cópia sanitizada e cutover de sessões. Recuperação fica sem envio/token até especificação de email.
-3. **Admin de questões/importação** (`admin_questoes.php`, `questoes_manager.php`, scripts JSON/XML de carga): primeiro leitura/listagem e exemplo, depois importação multipart com validação Zod/JSON/XML e upsert de paridade. Autorização admin. Dados SAT existentes são fixtures de leitura, não seed automático.
+3. **Admin de questões/importação** (`admin_questoes.php`, `questoes_manager.php`, scripts JSON/XML de carga): migrado parcialmente nesta branch; APIs de estatísticas, exemplo e importação multipart JSON/XML, autorização admin, tela React e testes estão implementados. O schema novo `questoes` foi criado somente após autorização explícita, está no banco de desenvolvimento e não recebeu seed. As divergências PHP entre `ativa`/`ativo` e `data_criacao`/`created_at` são documentadas; a implementação segue o DDL efetivamente criado e ainda requer comparação com o runtime PHP.
 4. **Fórum** (`forum.php`, `admin_forum.php`): categorias, busca/listagem/detalhe, criação/resposta/curtida, depois moderação/admin/banimento/auditoria. Paginador, filtros e aprovações precisam preservar exatamente o PHP ativo.
 5. **Simulado e resposta** (`simulador_provas.php`, `executar_teste.php`, `interface_teste.php`, `salvar_resposta.php`, `processar_teste.php`): seleção de prova, sessão, questão/timer, salvamento incremental, submissão transacional e pontuação. Resolver a regra de dissertativa/total antes de aceitar parity gate; não escolher qual bug corrigir sem fixture/especificação.
 6. **Resultado, revisão e histórico** (`resultado_teste.php`, `revisar_prova.php`, `historico_testes.php`, `historico_provas.php`): telas dependentes dos IDs/colunas acertados; listas, agregações, empty state e navegação. Validar a sessão `user_id`/`usuario_id` com usuário de fixture.
 7. **Corte e hardening:** teste E2E dos caminhos público/usuário/admin; comparar comportamento lado a lado; direcionar rotas por feature/reverse proxy; desativar scripts operacionais acessíveis publicamente ou movê-los para operação restrita; só remover PHP após paridade aceita, backup e rollback ensaiados.
 
-Ordem dos módulos pode ser ajustada após introspecção se dependências ou integrações reais mudarem. Não alterar tabelas/dados PHP existentes. A única tabela nova autorizada neste estágio é `node_sessions` no banco de desenvolvimento.
+Ordem dos módulos pode ser ajustada após introspecção se dependências ou integrações reais mudarem. Não alterar tabelas/dados PHP existentes. Tabelas novas autorizadas e criadas neste estágio: `node_sessions` e `questoes` no banco de desenvolvimento.
 
 ### Fluxo fixo dentro de cada módulo
 
@@ -139,4 +139,4 @@ Use Node.js compatível com o Vite e npm workspaces. `npm install` instala as de
 
 ## Próxima fronteira de migração
 
-Autenticação com persistência e telas login/cadastro está implementada. Próximo módulo: administração de questões/importação, precedido de introspecção read-only de suas tabelas e testes. Hashes bcrypt reais precisam ser verificados apenas em cópia sanitizada; PHP continua intacto e a sessão PHP não é compartilhada com Node.
+Administração/importação de questões está migrada parcialmente; paridade PHP ao vivo continua pendente. Próximo módulo: fórum, começando por introspecção read-only das tabelas reais e fixtures. Antes de avançar, concluir os gates de typecheck, lint, formatação, suíte, build, audit e revisão do diff. O PHP permanece intacto e sessões PHP não são compartilhadas com Node.

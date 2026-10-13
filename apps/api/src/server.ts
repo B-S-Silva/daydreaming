@@ -1,9 +1,19 @@
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createPool } from "mysql2/promise";
 import { drizzle } from "drizzle-orm/mysql2";
 import { createApp } from "./app.js";
 import { MySqlAuthRepository } from "./auth/auth-repository.js";
+import { MySqlQuestionRepository } from "./questions/question-repository.js";
 import { readApiConfig } from "./config.js";
 import * as schema from "./db/schema.js";
+
+const apiDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const envPath = resolve(apiDirectory, "../../.env");
+if (existsSync(envPath)) {
+  process.loadEnvFile(envPath);
+}
 
 const config = readApiConfig(process.env);
 const pool = createPool({
@@ -17,13 +27,18 @@ const pool = createPool({
   connectionLimit: 10,
 });
 const db = drizzle(pool, { schema, mode: "default" });
+const authOptions = {
+  repository: new MySqlAuthRepository(db),
+  sessionTtlSeconds: config.sessionTtlSeconds,
+  cookieSecure: config.cookieSecure,
+  webOrigin: config.webOrigin,
+};
 const app = createApp({
   logger: true,
-  auth: {
-    repository: new MySqlAuthRepository(db),
-    sessionTtlSeconds: config.sessionTtlSeconds,
-    cookieSecure: config.cookieSecure,
-    webOrigin: config.webOrigin,
+  auth: authOptions,
+  questions: {
+    auth: authOptions,
+    repository: new MySqlQuestionRepository(db),
   },
 });
 

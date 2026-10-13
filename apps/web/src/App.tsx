@@ -6,6 +6,7 @@ import { PasswordRecoveryPage } from "./features/auth/PasswordRecoveryPage.js";
 import { RegistrationPage } from "./features/auth/RegistrationPage.js";
 import { ExamCatalogPage } from "./features/public/ExamCatalogPage.js";
 import { HomePage } from "./features/public/HomePage.js";
+import { QuestionAdminPage } from "./features/questions/QuestionAdminPage.js";
 import "./styles.css";
 
 export function App() {
@@ -27,6 +28,7 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/cadastro" element={<RegistrationPage />} />
           <Route path="/recuperar-senha" element={<PasswordRecoveryPage />} />
+          <Route path="/admin/questoes" element={<QuestionAdminPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </BrowserRouter>

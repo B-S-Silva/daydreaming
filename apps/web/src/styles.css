@@ -528,6 +528,99 @@ select {
   font-weight: 600;
 }
 
+.question-admin-page {
+  padding-top: 36px;
+  padding-bottom: 56px;
+}
+
+.question-admin-heading {
+  margin-bottom: 28px;
+}
+
+.question-admin-heading h1 {
+  margin-bottom: 4px;
+}
+
+.question-admin-panel {
+  margin: 24px 0;
+  padding: clamp(18px, 3vw, 30px);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 18px #16233a12;
+}
+
+.question-admin-panel h2 {
+  margin-top: 0;
+}
+
+.question-stats-table-wrap {
+  overflow-x: auto;
+}
+
+.question-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.question-stats-table th,
+.question-stats-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e9edf1;
+}
+
+.question-import-form {
+  display: grid;
+  gap: 16px;
+  max-width: 650px;
+}
+
+.question-import-form label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.question-import-form select,
+.question-import-form input {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #b8c2cc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.question-import-form .button {
+  justify-self: start;
+}
+
+.question-example-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.question-example-links h3 {
+  width: 100%;
+  margin: 0;
+}
+
+.question-example-links button {
+  padding: 7px 12px;
+  border: 1px solid #187bcb;
+  border-radius: 6px;
+  color: #1266a8;
+  background: #fff;
+  cursor: pointer;
+}
+
+.question-example-links button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
 @media (max-width: 640px) {
   .public-header {
     flex-direction: column;

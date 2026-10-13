@@ -224,3 +224,62 @@ export type CurrentUserResponse = z.infer<typeof CurrentUserResponseSchema>;
 export type AuthValidationResponse = z.infer<typeof AuthValidationResponseSchema>;
 export type AuthSuccessResponse = z.infer<typeof AuthSuccessResponseSchema>;
 export type AuthErrorResponse = z.infer<typeof AuthErrorResponseSchema>;
+
+export const QuestionExamTypeSchema = z.enum([
+  "toefl",
+  "ielts",
+  "sat",
+  "gre",
+  "gmat",
+  "dele",
+  "delf",
+  "testdaf",
+  "jlpt",
+  "hsk",
+]);
+
+export const QuestionDifficultySchema = z.enum(["facil", "medio", "dificil"]);
+
+const RequiredQuestionTextSchema = z
+  .string()
+  .min(1)
+  .refine((value) => value !== "0");
+
+export const ImportedQuestionSchema = z.object({
+  numero_questao: z.number().int().positive(),
+  enunciado: RequiredQuestionTextSchema,
+  alternativa_a: RequiredQuestionTextSchema,
+  alternativa_b: RequiredQuestionTextSchema,
+  alternativa_c: RequiredQuestionTextSchema,
+  alternativa_d: RequiredQuestionTextSchema,
+  alternativa_e: RequiredQuestionTextSchema,
+  resposta_correta: RequiredQuestionTextSchema,
+  dificuldade: QuestionDifficultySchema.default("medio"),
+  materia: z.string().nullable().optional(),
+  assunto: z.string().nullable().optional(),
+  explicacao: z.string().nullable().optional(),
+});
+
+export const QuestionImportResponseSchema = z.object({
+  success: z.literal(true),
+  questoes_inseridas: z.number().int().nonnegative(),
+  questoes_atualizadas: z.number().int().nonnegative(),
+  total_processadas: z.number().int().nonnegative(),
+  message: z.string(),
+});
+
+export const QuestionStatsItemSchema = z.object({
+  tipo_prova: QuestionExamTypeSchema,
+  total: z.number().int().nonnegative(),
+  ultima_atualizacao: z.string().nullable(),
+});
+
+export const QuestionStatsResponseSchema = z.object({
+  items: z.array(QuestionStatsItemSchema),
+  total: z.number().int().nonnegative(),
+});
+
+export type QuestionExamType = z.infer<typeof QuestionExamTypeSchema>;
+export type ImportedQuestion = z.infer<typeof ImportedQuestionSchema>;
+export type QuestionImportResponse = z.infer<typeof QuestionImportResponseSchema>;
+export type QuestionStatsResponse = z.infer<typeof QuestionStatsResponseSchema>;

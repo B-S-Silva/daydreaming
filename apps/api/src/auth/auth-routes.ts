@@ -23,7 +23,7 @@ export interface AuthRouteOptions {
   webOrigin: string;
 }
 
-interface ResolvedSession {
+export interface ResolvedSession {
   idHash: string;
   session: AuthSession;
   user: Awaited<ReturnType<AuthRepository["findUserById"]>>;
@@ -72,7 +72,7 @@ async function issueSession(
   return { idHash, csrfToken };
 }
 
-async function resolveSession(
+export async function resolveSession(
   request: FastifyRequest,
   reply: FastifyReply,
   options: AuthRouteOptions,
@@ -104,7 +104,7 @@ async function resolveSession(
   };
 }
 
-async function requireMutationSession(
+export async function requireMutationSession(
   request: FastifyRequest,
   reply: FastifyReply,
   options: AuthRouteOptions,

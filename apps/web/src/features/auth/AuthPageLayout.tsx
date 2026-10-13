@@ -49,6 +49,11 @@ export function PublicHeader() {
         <Link className="public-header__home" to="/">
           🏠 Página Inicial
         </Link>
+        {currentUser?.authenticated && currentUser.user.isAdmin && (
+          <Link className="public-header__home" to="/admin/questoes">
+            📝 Gerenciar Questões
+          </Link>
+        )}
       </div>
       {currentUser?.authenticated ? (
         <button

@@ -6,6 +6,7 @@ config.php
 # Arquivos de banco de dados
 *.sql
 !apps/api/schema/auth.sql
+!apps/api/schema/questions.sql
 *.db
 *.sqlite
 *.sqlite3
