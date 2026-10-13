@@ -198,7 +198,9 @@ export function StudentProfilePage() {
         <section className="profile-badges" id="badges">
           <header>
             <h2>🏆 Minhas conquistas</h2>
-            <p>Conquistas calculadas a partir das suas provas, participação, GPA e guias abertos.</p>
+            <p>
+              Conquistas calculadas a partir das suas provas, participação, GPA e guias abertos.
+            </p>
           </header>
           {badgesQuery.isPending && <p role="status">Carregando conquistas...</p>}
           {badgesQuery.error && (
@@ -217,6 +219,15 @@ export function StudentProfilePage() {
           <div className="profile-badges__grid">
             {badgesQuery.data?.items.map((badge) => (
               <article className={`profile-badge profile-badge--${badge.rarity}`} key={badge.code}>
+                <img
+                  className="profile-badge__image"
+                  src={`/images/badge-${badge.code.replace(/_/g, "-")}.jpeg`}
+                  alt={badge.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                />
                 <span aria-hidden="true">{badge.icon}</span>
                 <h3>{badge.name}</h3>
                 <p>{badge.description}</p>

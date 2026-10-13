@@ -128,7 +128,9 @@ export class MySqlStudyRepository implements StudyRepository {
   async listBadges(userId: number): Promise<Badge[]> {
     const [bestTest] = await this.db
       .select({
-        percentage: sql<number | null>`MAX(100.0 * ${schema.resultadosTestes.acertos} / NULLIF(${schema.resultadosTestes.totalQuestoes}, 0))`,
+        percentage: sql<
+          number | null
+        >`MAX(100.0 * ${schema.resultadosTestes.acertos} / NULLIF(${schema.resultadosTestes.totalQuestoes}, 0))`,
       })
       .from(schema.resultadosTestes)
       .where(
@@ -155,15 +157,15 @@ export class MySqlStudyRepository implements StudyRepository {
       .where(eq(schema.paisesVisitados.usuarioId, userId));
 
     const participationCount = Number(topics?.total ?? 0) + Number(replies?.total ?? 0);
-    const gpaValue =
-      bestGpa === undefined || bestGpa.value === null ? null : Number(bestGpa.value);
+    const gpaValue = bestGpa === undefined || bestGpa.value === null ? null : Number(bestGpa.value);
     const countryCount = Number(countries?.total ?? 0);
     const achievements: Array<{ code: BadgeCode; context: string }> = [];
     const candidates = [
       {
-        code: bestTest?.percentage === null || bestTest?.percentage === undefined
-          ? null
-          : badgeFor("provas", Number(bestTest.percentage)),
+        code:
+          bestTest?.percentage === null || bestTest?.percentage === undefined
+            ? null
+            : badgeFor("provas", Number(bestTest.percentage)),
         context:
           bestTest?.percentage === null || bestTest?.percentage === undefined
             ? null
@@ -194,25 +196,17 @@ export class MySqlStudyRepository implements StudyRepository {
         const [badge] = await transaction
           .select()
           .from(schema.badges)
-          .where(
-            and(
-              eq(schema.badges.codigo, achievement.code),
-              eq(schema.badges.ativa, true),
-            ),
-          )
+          .where(and(eq(schema.badges.codigo, achievement.code), eq(schema.badges.ativa, true)))
           .limit(1);
         if (!badge) {
           continue;
         }
-        const [metadata] = await transaction
-          .insert(schema.usuarioBadges)
-          .ignore()
-          .values({
-            usuarioId: userId,
-            badgeId: badge.id,
-            contexto: achievement.context,
-            dataConquista: new Date(),
-          });
+        const [metadata] = await transaction.insert(schema.usuarioBadges).ignore().values({
+          usuarioId: userId,
+          badgeId: badge.id,
+          contexto: achievement.context,
+          dataConquista: new Date(),
+        });
         if (metadata.affectedRows === 0) {
           continue;
         }
@@ -241,16 +235,15 @@ export class MySqlStudyRepository implements StudyRepository {
       .where(eq(schema.usuarioBadges.usuarioId, userId))
       .orderBy(desc(schema.usuarioBadges.dataConquista));
     return rows.map((row) => {
-      const category: Badge["category"] =
-        row.code.startsWith("prova_")
-          ? "provas"
-          : row.code.startsWith("forum_")
-            ? "forum"
-            : row.code.startsWith("gpa_")
-              ? "gpa"
-              : row.code.startsWith("paises_")
-                ? "paises"
-                : "outros";
+      const category: Badge["category"] = row.code.startsWith("prova_")
+        ? "provas"
+        : row.code.startsWith("forum_")
+          ? "forum"
+          : row.code.startsWith("gpa_")
+            ? "gpa"
+            : row.code.startsWith("paises_")
+              ? "paises"
+              : "outros";
       const rarity: Badge["rarity"] =
         row.rarity === "raro" || row.rarity === "epico" || row.rarity === "lendario"
           ? row.rarity

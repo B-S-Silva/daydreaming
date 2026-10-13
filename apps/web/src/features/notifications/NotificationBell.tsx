@@ -61,9 +61,7 @@ export function NotificationBell({ authenticated, csrfToken }: NotificationBellP
           )}
         </header>
         {notificationsQuery.isPending && <p role="status">Carregando...</p>}
-        {notificationsQuery.error && (
-          <p role="alert">Não foi possível carregar as notificações.</p>
-        )}
+        {notificationsQuery.error && <p role="alert">Não foi possível carregar as notificações.</p>}
         {(markMutation.error || markAllMutation.error) && (
           <p role="alert">Não foi possível atualizar as notificações.</p>
         )}

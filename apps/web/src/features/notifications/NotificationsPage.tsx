@@ -77,9 +77,7 @@ export function NotificationsPage() {
           )}
         </header>
         {currentUserQuery.isPending && <p role="status">Verificando sessão...</p>}
-        {currentUserQuery.error && (
-          <p role="alert">Não foi possível verificar sua sessão.</p>
-        )}
+        {currentUserQuery.error && <p role="alert">Não foi possível verificar sua sessão.</p>}
         {currentUserQuery.data?.authenticated === false && (
           <section className="notification-card">
             <p>Entre na sua conta para acessar as notificações.</p>

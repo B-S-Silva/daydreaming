@@ -4,6 +4,7 @@ import { PublicHeader } from "../auth/AuthPageLayout.js";
 const features = [
   {
     icon: "🎯",
+    image: "/images/simulador-prova.png",
     title: "Testes Personalizados",
     description:
       "Simulados específicos para cada país e tipo de exame, adaptados ao seu nível e objetivos acadêmicos.",
@@ -11,6 +12,7 @@ const features = [
   },
   {
     icon: "🌍",
+    image: "/images/paises.png",
     title: "Cobertura Global",
     description: "Informações sobre testes de proficiência e preparação internacional.",
     href: "/exames-internacionais",
@@ -23,6 +25,7 @@ const features = [
   },
   {
     icon: "📚",
+    image: "/images/calc.png",
     title: "Ferramentas de Estudo",
     description:
       "Estime seu GPA, explore interesses profissionais e pratique respostas para entrevistas.",
@@ -30,6 +33,7 @@ const features = [
   },
   {
     icon: "🏛️",
+    image: "/images/ranking.png",
     title: "Ranking Universitário",
     description: "Compare 89 universidades por país, região, posição e pontuação.",
     href: "/ranking",
@@ -53,6 +57,7 @@ const features = [
   },
   {
     icon: "💡",
+    image: "/images/forum.png",
     title: "Dicas de Especialistas",
     description:
       "Conteúdo criado por especialistas em educação internacional e ex-estudantes no exterior.",
@@ -85,6 +90,12 @@ export function HomePage() {
                 👤 Fazer Login
               </Link>
             </div>
+            <img
+              className="hero__banner-image"
+              src="/images/primeira-sessao.png"
+              alt="Plataforma de estudos internacionais"
+              loading="eager"
+            />
           </div>
         </section>
 
@@ -135,6 +146,12 @@ export function HomePage() {
 
         <section className="callout page-section">
           <div className="callout__content">
+            <img
+              src="/images/segunda-sessao.png"
+              alt="Comunidade de estudantes"
+              style={{ maxHeight: "180px", margin: "0 auto 24px", objectFit: "contain" }}
+              loading="lazy"
+            />
             <h2>🚀 Comece Sua Jornada Hoje</h2>
             <p>
               Junte-se a milhares de estudantes que já realizaram o sonho de estudar no exterior.
@@ -152,8 +169,21 @@ export function HomePage() {
         </section>
       </main>
       <footer className="site-footer">
+        <Link to="/" aria-label="DayDreaming Início">
+          <img
+            src="/images/logo-daydreaming.png"
+            alt="DayDreaming"
+            style={{ height: "36px", margin: "0 auto 16px", objectFit: "contain" }}
+          />
+        </Link>
         <p>DayDreaming — planejamento e preparação para estudar no exterior.</p>
-        <Link to="/quem-somos">Quem somos</Link>
+        <div style={{ marginTop: "12px" }}>
+          <Link to="/quem-somos">Quem somos</Link>
+          <Link to="/guias-paises">Guias de Países</Link>
+          <Link to="/exames-internacionais">Exames</Link>
+          <Link to="/ranking">Ranking Universitário</Link>
+          <Link to="/simulador">Simulados</Link>
+        </div>
       </footer>
     </>
   );

@@ -59,7 +59,7 @@ export function UniversityRankingPage() {
 
   useEffect(() => {
     if (selectedId && detailsQuery.data) {
-      detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      detailsRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
     }
   }, [selectedId, detailsQuery.data]);
 
@@ -175,11 +175,7 @@ export function UniversityRankingPage() {
               >
                 Limpar filtros
               </button>
-              <button
-                className="university-ranking__button"
-                type="button"
-                onClick={applyFilters}
-              >
+              <button className="university-ranking__button" type="button" onClick={applyFilters}>
                 Aplicar filtros
               </button>
             </div>

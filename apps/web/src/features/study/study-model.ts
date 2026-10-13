@@ -29,7 +29,13 @@ export const careerProfiles: Record<CareerChoice, CareerProfile> = {
         title: "Administração de Empresas",
         description:
           "Profissionais de administração planejam, coordenam e dirigem atividades em organizações. Eles podem trabalhar em diversos setores como finanças, marketing, recursos humanos ou operações.",
-        skills: ["Liderança", "Planejamento", "Análise de dados", "Comunicação", "Tomada de decisão"],
+        skills: [
+          "Liderança",
+          "Planejamento",
+          "Análise de dados",
+          "Comunicação",
+          "Tomada de decisão",
+        ],
       },
       {
         title: "Gestão de Projetos",

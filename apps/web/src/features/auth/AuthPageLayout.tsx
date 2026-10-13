@@ -25,13 +25,22 @@ export function PublicHeader() {
 
   return (
     <header className="public-header">
+      <Link className="public-header__brand" to="/" aria-label="DayDreaming Início">
+        <img
+          className="public-header__logo"
+          src="/images/logo-daydreaming.png"
+          alt="DayDreaming Logo"
+        />
+      </Link>
       <div className="public-header__identity">
         {currentUserQuery.isPending ? (
           <span className="public-header__status" aria-live="polite">
             Verificando sessão...
           </span>
         ) : currentUser?.authenticated ? (
-          <span className="public-header__status">✅ Olá, {currentUser.user.name}</span>
+          <span className="public-header__status public-header__status--user">
+            ✅ Olá, {currentUser.user.name}
+          </span>
         ) : (
           <span className="public-header__status">❌ Você não está logado</span>
         )}
@@ -77,20 +86,22 @@ export function PublicHeader() {
           <NotificationBell authenticated csrfToken={currentUser.csrfToken} />
         )}
       </div>
-      {currentUser?.authenticated ? (
-        <button
-          className="public-header__login"
-          disabled={logoutMutation.isPending}
-          onClick={() => logoutMutation.mutate(currentUser.csrfToken)}
-          type="button"
-        >
-          {logoutMutation.isPending ? "SAINDO..." : "🚪 Sair"}
-        </button>
-      ) : (
-        <Link className="public-header__login" to="/login">
-          🔑 Fazer Login
-        </Link>
-      )}
+      <div className="public-header__actions">
+        {currentUser?.authenticated ? (
+          <button
+            className="public-header__login"
+            disabled={logoutMutation.isPending}
+            onClick={() => logoutMutation.mutate(currentUser.csrfToken)}
+            type="button"
+          >
+            {logoutMutation.isPending ? "SAINDO..." : "🚪 Sair"}
+          </button>
+        ) : (
+          <Link className="public-header__login" to="/login">
+            🔑 Fazer Login
+          </Link>
+        )}
+      </div>
       {logoutMutation.error && (
         <span className="public-header__status" role="alert">
           {logoutMutation.error instanceof AuthApiError
@@ -108,6 +119,15 @@ export function AuthPageLayout({ title, children }: AuthPageLayoutProps) {
       <PublicHeader />
       <main className="auth-page">
         <section className="auth-card">
+          <div style={{ textAlign: "center", marginBottom: "20px" }}>
+            <Link to="/">
+              <img
+                src="/images/logo-daydreaming.png"
+                alt="DayDreaming Logo"
+                style={{ height: "46px", margin: "0 auto", objectFit: "contain" }}
+              />
+            </Link>
+          </div>
           <h1>{title}</h1>
           {children}
         </section>

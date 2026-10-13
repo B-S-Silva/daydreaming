@@ -54,10 +54,7 @@ const thresholds: Record<
   ],
 };
 
-export function badgeFor(
-  category: keyof typeof thresholds,
-  value: number,
-): BadgeCode | null {
+export function badgeFor(category: keyof typeof thresholds, value: number): BadgeCode | null {
   let awarded: BadgeCode | null = null;
   for (const threshold of thresholds[category]) {
     if (value < threshold.minimum) {

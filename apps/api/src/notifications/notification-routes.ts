@@ -69,9 +69,7 @@ export function registerNotificationRoutes(
       options.repository.list(session.user.id, limit, scope === "unread"),
       options.repository.unreadCount(session.user.id),
     ]);
-    return reply
-      .code(200)
-      .send(NotificationListResponseSchema.parse({ items, unreadCount }));
+    return reply.code(200).send(NotificationListResponseSchema.parse({ items, unreadCount }));
   });
 
   app.post<{ Params: { id: string } }>("/api/notifications/:id/read", async (request, reply) => {

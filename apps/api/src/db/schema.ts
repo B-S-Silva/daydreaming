@@ -404,3 +404,29 @@ export const niveisUsuario = mysqlTable(
   },
   (table) => [uniqueIndex("unique_niveis_usuario").on(table.usuarioId)],
 );
+
+export const notificacoesUsuario = mysqlTable(
+  "notificacoes_usuario",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    tipo: mysqlEnum("tipo", [
+      "forum_resposta",
+      "forum_mencao",
+      "badge_conquistada",
+      "nivel_subiu",
+      "sistema",
+    ]).notNull(),
+    titulo: varchar("titulo", { length: 160 }).notNull(),
+    mensagem: text("mensagem").notNull(),
+    link: varchar("link", { length: 255 }),
+    lida: boolean("lida").notNull().default(false),
+    dataCriacao: timestamp("data_criacao", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_notificacoes_usuario_lida").on(table.usuarioId, table.lida),
+    index("idx_notificacoes_data").on(table.dataCriacao),
+  ],
+);

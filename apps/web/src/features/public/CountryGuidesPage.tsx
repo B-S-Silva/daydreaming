@@ -54,6 +54,18 @@ function CountryGuideDirectory() {
         <div className="guide-grid">
           {items.map((guide) => (
             <article className="guide-card" key={guide.id}>
+              <div className="guide-card__image-wrap">
+                <img
+                  className="guide-card__image"
+                  src={`/images/${guide.id}-home.png`}
+                  alt={`Estudar em ${guide.name}`}
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      `/images/${guide.id}-background.jpg`;
+                  }}
+                />
+              </div>
               <h2>
                 <span aria-hidden="true">{guide.flag}</span> {guide.name}
               </h2>
@@ -108,6 +120,25 @@ function CountryGuideDetail({ id }: { id: string }) {
         {data && (
           <>
             <header className="results-heading">
+              <div
+                style={{
+                  position: "relative",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  marginBottom: "24px",
+                  maxHeight: "260px",
+                  boxShadow: "var(--shadow-md)",
+                }}
+              >
+                <img
+                  src={`/images/${data.id}-background.jpg`}
+                  alt={`Paisagem de ${data.name}`}
+                  style={{ width: "100%", height: "240px", objectFit: "cover" }}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = `/images/${data.id}-home.png`;
+                  }}
+                />
+              </div>
               <h1>
                 <span aria-hidden="true">{data.flag}</span> {data.name}
               </h1>

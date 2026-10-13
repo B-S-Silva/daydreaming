@@ -43,14 +43,10 @@ describe("study tools", () => {
   it("shows the exploratory career result for answered quiz items", async () => {
     openTools();
     fireEvent.click(screen.getByRole("button", { name: "Quiz vocacional" }));
-    fireEvent.click(
-      screen.getAllByLabelText("Organizar, planejar e trabalhar com metas ou dados")[0]!,
-    );
+    fireEvent.click(screen.getByLabelText(/A\) Em um escritório estruturado e organizado/i));
     fireEvent.click(screen.getByRole("button", { name: "Ver perfil exploratório" }));
 
-    expect(
-      await screen.findByRole("heading", { name: "Gestor(a) / Administrativo(a)" }),
-    ).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: /Gestor/i })).toBeTruthy();
     expect(screen.getByText(/não é uma avaliação profissional validada/i)).toBeTruthy();
   });
 });

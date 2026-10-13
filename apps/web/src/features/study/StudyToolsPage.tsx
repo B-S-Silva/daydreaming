@@ -118,8 +118,19 @@ function GpaCalculator() {
 
   return (
     <section className="study-tool-card">
-      <h2>Calculadora de GPA</h2>
-      <p>Adicione suas notas em uma escala de 0 a 10 para obter uma estimativa na escala 0–4.</p>
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+        <img
+          src="/images/calc.png"
+          alt="Calculadora de GPA"
+          style={{ height: "48px", width: "48px", objectFit: "contain" }}
+        />
+        <div>
+          <h2 style={{ margin: 0 }}>Calculadora de GPA</h2>
+          <p style={{ margin: "4px 0 0", color: "var(--slate-600)", fontSize: "0.95rem" }}>
+            Adicione suas notas em uma escala de 0 a 10 para obter uma estimativa na escala 0–4.
+          </p>
+        </div>
+      </div>
       <div className="gpa-rows">
         {rows.map((row, index) => (
           <div className="gpa-row" key={row.id}>
@@ -208,8 +219,19 @@ function CareerQuiz() {
 
   return (
     <section className="study-tool-card">
-      <h2>Quiz vocacional exploratório</h2>
-      <p>Escolha a opção que mais combina com você. Não é uma avaliação profissional validada.</p>
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+        <img
+          src="/images/descoberta.png"
+          alt="Quiz vocacional"
+          style={{ height: "48px", width: "48px", objectFit: "contain" }}
+        />
+        <div>
+          <h2 style={{ margin: 0 }}>Quiz vocacional exploratório</h2>
+          <p style={{ margin: "4px 0 0", color: "var(--slate-600)", fontSize: "0.95rem" }}>
+            Escolha a opção que mais combina com você. Não é uma avaliação profissional validada.
+          </p>
+        </div>
+      </div>
       <div className="career-questions">
         {careerQuizQuestions.map((question, index) => (
           <fieldset key={question.question}>
@@ -217,16 +239,16 @@ function CareerQuiz() {
             {question.options.map((option) => {
               const value = option.slice(0, 1) as CareerChoice;
               return (
-              <label key={value}>
-                <input
-                  checked={answers[index] === value}
-                  name={`career-${index}`}
-                  onChange={() => setAnswers((current) => ({ ...current, [index]: value }))}
-                  type="radio"
-                  value={value}
-                />
-                {option}
-              </label>
+                <label key={value}>
+                  <input
+                    checked={answers[index] === value}
+                    name={`career-${index}`}
+                    onChange={() => setAnswers((current) => ({ ...current, [index]: value }))}
+                    type="radio"
+                    value={value}
+                  />
+                  {option}
+                </label>
               );
             })}
           </fieldset>
@@ -273,11 +295,20 @@ function InterviewPractice() {
 
   return (
     <section className="study-tool-card">
-      <h2>Prática de entrevista</h2>
-      <p>
-        Escreva rascunhos para as perguntas. O indicador considera apenas o tamanho das respostas,
-        não avalia conteúdo, clareza ou qualidade.
-      </p>
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+        <img
+          src="/images/simulador-entrevista.png"
+          alt="Prática de entrevista"
+          style={{ height: "48px", width: "48px", objectFit: "contain" }}
+        />
+        <div>
+          <h2 style={{ margin: 0 }}>Prática de entrevista</h2>
+          <p style={{ margin: "4px 0 0", color: "var(--slate-600)", fontSize: "0.95rem" }}>
+            Escreva rascunhos para as perguntas. O indicador considera apenas o tamanho das
+            respostas, não avalia conteúdo, clareza ou qualidade.
+          </p>
+        </div>
+      </div>
       {interviewQuestions.map((question, index) => (
         <label className="interview-answer" key={question}>
           <span>

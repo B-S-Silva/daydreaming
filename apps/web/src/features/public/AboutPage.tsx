@@ -7,16 +7,27 @@ export function AboutPage() {
       <PublicHeader />
       <main className="country-guides-page content-width">
         <header className="results-heading">
+          <img
+            src="/images/logo-daydreaming.png"
+            alt="DayDreaming Logo"
+            style={{ height: "54px", margin: "0 auto 16px", objectFit: "contain" }}
+          />
           <h1>Conheça o DayDreaming</h1>
-          <p>
-            Jovens apaixonados por democratizar o acesso à educação internacional.
-          </p>
+          <p>Jovens apaixonados por democratizar o acesso à educação internacional.</p>
         </header>
-        <section className="guide-section">
-          <h2>🎯 Nossa missão</h2>
-          <p>
-            Transformar sonhos de intercâmbio em realidade para estudantes da rede pública.
-          </p>
+        <section
+          className="guide-section"
+          style={{ display: "flex", gap: "24px", alignItems: "center", flexWrap: "wrap" }}
+        >
+          <div style={{ flex: "1 1 300px" }}>
+            <h2>🎯 Nossa missão</h2>
+            <p>Transformar sonhos de intercâmbio em realidade para estudantes da rede pública.</p>
+          </div>
+          <img
+            src="/images/paises.png"
+            alt="Educação global"
+            style={{ maxHeight: "140px", objectFit: "contain" }}
+          />
         </section>
         <div className="about-mission-grid">
           <section className="guide-section">
@@ -30,8 +41,8 @@ export function AboutPage() {
           <section className="guide-section">
             <h2>Construir comunidade</h2>
             <p>
-              Criamos uma rede de apoio entre estudantes com objetivos similares, promovendo troca de
-              experiências, dicas valiosas e parcerias de estudo.
+              Criamos uma rede de apoio entre estudantes com objetivos similares, promovendo troca
+              de experiências, dicas valiosas e parcerias de estudo.
             </p>
           </section>
           <section className="guide-section">
@@ -58,6 +69,10 @@ export function AboutPage() {
           </Link>
         </nav>
       </main>
+      <footer className="site-footer">
+        <p>DayDreaming — planejamento e preparação para estudar no exterior.</p>
+        <Link to="/quem-somos">Quem somos</Link>
+      </footer>
     </>
   );
 }
