@@ -5,6 +5,10 @@ config.php
 
 # Arquivos de banco de dados
 *.sql
+!apps/api/schema/auth.sql
+!apps/api/schema/questions.sql
+!apps/api/schema/forum.sql
+!apps/api/schema/simulators.sql
 *.db
 *.sqlite
 *.sqlite3
@@ -40,30 +44,11 @@ yarn-error.log*
 
 # Composer (se houver)
 vendor/
-composer.lock
 
-# Arquivos temporários do PHP
+# Arquivos temporários
 *.tmp
 *.bak
 *.backup
-
-# Arquivos de teste
-test_db.php
-debug_*.php
-testar_*.php
-
-# Manter arquivos de verificação para colaboradores
-# verificar_instalacao.php
-# verificar_tabelas_completas.php
-# verificar_sistema_colaborador.php
-# README_COLABORADORES.md
-# config.exemplo.php
-
-# Arquivos específicos para colaboradores (não ignorar)
-!setup_database.php
-!verificar_sistema_colaborador.php
-!README_COLABORADORES.md
-!config.exemplo.php
 
 # Arquivos específicos do Windows
 ehthumbs.db
@@ -106,3 +91,9 @@ jspm_packages/
 
 # Yarn Integrity file
 .yarn-integrity
+# JavaScript workspaces
+node_modules/
+**/node_modules/
+**/dist/
+**/coverage/
+.vite/
