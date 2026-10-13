@@ -6,17 +6,20 @@ import { registerAuthRoutes } from "./auth/auth-routes.js";
 import { getInternationalExamCatalog } from "./public/international-exams.js";
 import type { QuestionRouteOptions } from "./questions/question-routes.js";
 import { registerQuestionRoutes } from "./questions/question-routes.js";
+import type { ForumRouteOptions } from "./forum/forum-routes.js";
+import { registerForumRoutes } from "./forum/forum-routes.js";
 
 export interface CreateAppOptions {
   auth?: AuthRouteOptions;
   questions?: QuestionRouteOptions;
+  forum?: ForumRouteOptions;
   logger?: boolean;
 }
 
 export function createApp(options: CreateAppOptions = {}) {
   const app = Fastify({ logger: options.logger ?? false });
 
-  if (options.auth || options.questions) {
+  if (options.auth || options.questions || options.forum) {
     app.register(rateLimit, {
       global: false,
       errorResponseBuilder: (_request, context) =>
@@ -35,13 +38,16 @@ export function createApp(options: CreateAppOptions = {}) {
     return reply.code(200).send(getInternationalExamCatalog());
   });
 
-  if (options.auth || options.questions) {
+  if (options.auth || options.questions || options.forum) {
     app.register(async (authApp) => {
       if (options.auth) {
         registerAuthRoutes(authApp, options.auth);
       }
       if (options.questions) {
         registerQuestionRoutes(authApp, options.questions);
+      }
+      if (options.forum) {
+        registerForumRoutes(authApp, options.forum);
       }
     });
   }

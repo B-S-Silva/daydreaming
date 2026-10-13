@@ -6,6 +6,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { createApp } from "./app.js";
 import { MySqlAuthRepository } from "./auth/auth-repository.js";
 import { MySqlQuestionRepository } from "./questions/question-repository.js";
+import { MySqlForumRepository } from "./forum/forum-repository.js";
 import { readApiConfig } from "./config.js";
 import * as schema from "./db/schema.js";
 
@@ -39,6 +40,10 @@ const app = createApp({
   questions: {
     auth: authOptions,
     repository: new MySqlQuestionRepository(db),
+  },
+  forum: {
+    auth: authOptions,
+    repository: new MySqlForumRepository(db),
   },
 });
 

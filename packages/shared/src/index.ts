@@ -283,3 +283,144 @@ export type QuestionExamType = z.infer<typeof QuestionExamTypeSchema>;
 export type ImportedQuestion = z.infer<typeof ImportedQuestionSchema>;
 export type QuestionImportResponse = z.infer<typeof QuestionImportResponseSchema>;
 export type QuestionStatsResponse = z.infer<typeof QuestionStatsResponseSchema>;
+
+const PhpTrimmedForumStringSchema = z.string().transform(trimPhpInput);
+const RequiredForumStringSchema = PhpTrimmedForumStringSchema.refine((value) => !isPhpEmpty(value));
+
+export const ForumCategorySchema = z.object({
+  id: z.number().int().positive(),
+  nome: z.string(),
+  descricao: z.string().nullable(),
+  cor: z.string(),
+  icone: z.string(),
+  ativo: z.boolean(),
+});
+
+export const ForumCategoryInputSchema = z.object({
+  nome: RequiredForumStringSchema.pipe(z.string().max(100)),
+  descricao: PhpTrimmedForumStringSchema,
+  cor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  icone: z.string().max(50),
+});
+
+export const ForumTopicInputSchema = z.object({
+  categoria_id: z.number().int().positive(),
+  titulo: RequiredForumStringSchema.pipe(z.string().max(255)),
+  conteudo: RequiredForumStringSchema,
+});
+
+export const ForumReplyInputSchema = z.object({
+  topico_id: z.number().int().positive(),
+  conteudo: RequiredForumStringSchema,
+});
+
+export const ForumLikeInputSchema = z.object({
+  tipo: z.enum(["topico", "resposta"]),
+  id: z.number().int().positive(),
+});
+
+export const ForumTopicActionSchema = z.enum(["aprovar", "rejeitar", "fixar", "fechar", "deletar"]);
+
+export const ForumReplyActionSchema = z.enum(["aprovar", "rejeitar", "deletar"]);
+
+export const ForumModerationInputSchema = z.object({
+  tipo: z.enum(["topico", "resposta"]),
+  id: z.number().int().positive(),
+  acao: z.string().min(1),
+  motivo: z.string().nullable().optional(),
+});
+
+export const ForumCategoryListResponseSchema = z.object({
+  items: z.array(ForumCategorySchema),
+});
+
+export const ForumTopicSchema = z.object({
+  id: z.number().int().positive(),
+  categoria_id: z.number().int().positive(),
+  titulo: z.string(),
+  conteudo: z.string(),
+  visualizacoes: z.number().int().nonnegative(),
+  fixado: z.boolean(),
+  fechado: z.boolean(),
+  aprovado: z.boolean(),
+  data_criacao: z.string(),
+  data_atualizacao: z.string(),
+  autor_id: z.number().int().positive(),
+  autor_nome: z.string(),
+  categoria_nome: z.string(),
+  categoria_cor: z.string(),
+  categoria_icone: z.string(),
+  total_respostas: z.number().int().nonnegative(),
+  total_likes: z.number().int().nonnegative(),
+});
+
+export const ForumReplySchema = z.object({
+  id: z.number().int().positive(),
+  topico_id: z.number().int().positive(),
+  autor_id: z.number().int().positive(),
+  autor_nome: z.string(),
+  conteudo: z.string(),
+  aprovado: z.boolean(),
+  data_criacao: z.string(),
+  total_likes: z.number().int().nonnegative(),
+});
+
+export const ForumTopicListResponseSchema = z.object({
+  items: z.array(ForumTopicSchema),
+});
+
+export const ForumTopicDetailResponseSchema = z.object({
+  topic: ForumTopicSchema,
+  replies: z.array(ForumReplySchema),
+});
+
+export const ForumAdminStatsResponseSchema = z.object({
+  total_topicos: z.number().int().nonnegative(),
+  topicos_pendentes: z.number().int().nonnegative(),
+  total_respostas: z.number().int().nonnegative(),
+  respostas_pendentes: z.number().int().nonnegative(),
+  total_usuarios: z.number().int().nonnegative(),
+});
+
+export const ForumAdminUserSchema = z.object({
+  id: z.number().int().positive(),
+  nome: z.string(),
+  usuario: z.string(),
+  email: z.string(),
+  is_admin: z.boolean(),
+  ativo: z.boolean(),
+  data_criacao: z.string(),
+  total_topicos: z.number().int().nonnegative(),
+  total_respostas: z.number().int().nonnegative(),
+});
+
+export const ForumModerationLogSchema = z.object({
+  id: z.number().int().positive(),
+  moderador_nome: z.string(),
+  tipo_conteudo: z.string().nullable(),
+  conteudo_id: z.number().int().positive().nullable(),
+  acao: z.string(),
+  motivo: z.string().nullable(),
+  data_acao: z.string(),
+});
+
+export const ForumAdminDashboardResponseSchema = z.object({
+  stats: ForumAdminStatsResponseSchema,
+  topics: z.array(ForumTopicSchema),
+  pendingReplies: z.array(ForumReplySchema.extend({ topico_titulo: z.string() })),
+  categories: z.array(ForumCategorySchema),
+  users: z.array(ForumAdminUserSchema),
+  logs: z.array(ForumModerationLogSchema),
+});
+
+export const ForumMutationResponseSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+});
+
+export type ForumCategory = z.infer<typeof ForumCategorySchema>;
+export type ForumTopic = z.infer<typeof ForumTopicSchema>;
+export type ForumReply = z.infer<typeof ForumReplySchema>;
+export type ForumAdminDashboardResponse = z.infer<typeof ForumAdminDashboardResponseSchema>;
+export type ForumAdminUser = z.infer<typeof ForumAdminUserSchema>;
+export type ForumModerationLog = z.infer<typeof ForumModerationLogSchema>;

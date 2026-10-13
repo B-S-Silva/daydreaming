@@ -80,3 +80,113 @@ export const questoes = mysqlTable(
     index("idx_questoes_ativa_tipo").on(table.ativa, table.tipoProva),
   ],
 );
+
+export const forumCategorias = mysqlTable(
+  "forum_categorias",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    nome: varchar("nome", { length: 100 }).notNull(),
+    descricao: text("descricao"),
+    cor: varchar("cor", { length: 7 }).notNull().default("#187bcd"),
+    icone: varchar("icone", { length: 50 }).notNull().default("💬"),
+    ativo: boolean("ativo").notNull().default(true),
+    ordem: int("ordem").notNull().default(0),
+    dataCriacao: timestamp("data_criacao", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("idx_forum_categorias_ativo_ordem").on(table.ativo, table.ordem, table.nome)],
+);
+
+export const forumTopicos = mysqlTable(
+  "forum_topicos",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    categoriaId: int("categoria_id")
+      .notNull()
+      .references(() => forumCategorias.id, { onDelete: "restrict" }),
+    autorId: int("autor_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    usuarioId: int("usuario_id").references(() => usuarios.id, { onDelete: "set null" }),
+    titulo: varchar("titulo", { length: 255 }).notNull(),
+    conteudo: text("conteudo").notNull(),
+    visualizacoes: int("visualizacoes").notNull().default(0),
+    fixado: boolean("fixado").notNull().default(false),
+    fechado: boolean("fechado").notNull().default(false),
+    aprovado: boolean("aprovado").notNull().default(true),
+    dataCriacao: timestamp("data_criacao", { mode: "date" }).notNull().defaultNow(),
+    dataAtualizacao: timestamp("data_atualizacao", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_forum_topicos_categoria_atualizacao").on(table.categoriaId, table.dataAtualizacao),
+    index("idx_forum_topicos_autor").on(table.autorId),
+    index("idx_forum_topicos_usuario").on(table.usuarioId),
+    index("idx_forum_topicos_moderacao").on(table.aprovado, table.fixado, table.fechado),
+  ],
+);
+
+export const forumRespostas = mysqlTable(
+  "forum_respostas",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    topicoId: int("topico_id")
+      .notNull()
+      .references(() => forumTopicos.id, { onDelete: "cascade" }),
+    autorId: int("autor_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    usuarioId: int("usuario_id").references(() => usuarios.id, { onDelete: "set null" }),
+    conteudo: text("conteudo").notNull(),
+    aprovado: boolean("aprovado").notNull().default(true),
+    dataCriacao: timestamp("data_criacao", { mode: "date" }).notNull().defaultNow(),
+    dataAtualizacao: timestamp("data_atualizacao", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_forum_respostas_topico_data").on(table.topicoId, table.dataCriacao),
+    index("idx_forum_respostas_autor").on(table.autorId),
+    index("idx_forum_respostas_usuario").on(table.usuarioId),
+    index("idx_forum_respostas_aprovado").on(table.aprovado),
+  ],
+);
+
+export const forumCurtidas = mysqlTable(
+  "forum_curtidas",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    topicoId: int("topico_id").references(() => forumTopicos.id, { onDelete: "cascade" }),
+    respostaId: int("resposta_id").references(() => forumRespostas.id, { onDelete: "cascade" }),
+    tipoCurtida: varchar("tipo_curtida", { length: 10 }).notNull().default("like"),
+    dataCriacao: timestamp("data_criacao", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("unique_curtida_topico").on(table.usuarioId, table.topicoId),
+    uniqueIndex("unique_curtida_resposta").on(table.usuarioId, table.respostaId),
+    index("idx_forum_curtidas_topico").on(table.topicoId),
+    index("idx_forum_curtidas_resposta").on(table.respostaId),
+  ],
+);
+
+export const forumModeracao = mysqlTable(
+  "forum_moderacao",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    moderadorId: int("moderador_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    tipoConteudo: varchar("tipo_conteudo", { length: 20 }),
+    conteudoId: int("conteudo_id"),
+    topicoId: int("topico_id"),
+    respostaId: int("resposta_id"),
+    acao: varchar("acao", { length: 30 }).notNull(),
+    motivo: text("motivo"),
+    dataAcao: timestamp("data_acao", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_forum_moderacao_data").on(table.dataAcao),
+    index("idx_forum_moderacao_alvo").on(table.tipoConteudo, table.conteudoId),
+    index("idx_forum_moderacao_topico").on(table.topicoId),
+    index("idx_forum_moderacao_resposta").on(table.respostaId),
+  ],
+);

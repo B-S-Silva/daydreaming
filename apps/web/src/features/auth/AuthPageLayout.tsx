@@ -54,6 +54,16 @@ export function PublicHeader() {
             📝 Gerenciar Questões
           </Link>
         )}
+        {currentUser?.authenticated && (
+          <Link className="public-header__home" to="/forum">
+            💬 Fórum
+          </Link>
+        )}
+        {currentUser?.authenticated && currentUser.user.isAdmin && (
+          <Link className="public-header__home" to="/admin/forum">
+            ⚙️ Admin do Fórum
+          </Link>
+        )}
       </div>
       {currentUser?.authenticated ? (
         <button
