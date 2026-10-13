@@ -7,7 +7,7 @@ const features = [
     title: "Testes Personalizados",
     description:
       "Simulados específicos para cada país e tipo de exame, adaptados ao seu nível e objetivos acadêmicos.",
-    href: "/simulador_provas.php",
+    href: "/simulador",
   },
   {
     icon: "🌍",
@@ -21,7 +21,7 @@ const features = [
     title: "Acompanhamento Detalhado",
     description:
       "Monitore seu progresso com relatórios detalhados e dicas personalizadas para melhorar seu desempenho.",
-    href: "/simulador_provas.php#ancora",
+    href: "/simulador",
   },
   {
     icon: "🎓",
@@ -38,7 +38,7 @@ const features = [
     title: "Dicas de Especialistas",
     description:
       "Conteúdo criado por especialistas em educação internacional e ex-estudantes no exterior.",
-    href: "/forum.php",
+    href: "/forum",
   },
 ];
 

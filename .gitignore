@@ -8,6 +8,7 @@ config.php
 !apps/api/schema/auth.sql
 !apps/api/schema/questions.sql
 !apps/api/schema/forum.sql
+!apps/api/schema/simulators.sql
 *.db
 *.sqlite
 *.sqlite3

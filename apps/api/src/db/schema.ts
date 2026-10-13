@@ -1,8 +1,12 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   char,
+  datetime,
+  decimal,
   index,
   int,
+  mysqlEnum,
   mysqlTable,
   text,
   timestamp,
@@ -78,6 +82,81 @@ export const questoes = mysqlTable(
   (table) => [
     uniqueIndex("unique_tipo_numero").on(table.tipoProva, table.numeroQuestao),
     index("idx_questoes_ativa_tipo").on(table.ativa, table.tipoProva),
+  ],
+);
+
+export const sessoesTeste = mysqlTable(
+  "sessoes_teste",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    tipoProva: varchar("tipo_prova", { length: 20 }).notNull(),
+    inicio: datetime("inicio", { mode: "date" }).notNull(),
+    fim: datetime("fim", { mode: "date" }),
+    duracaoMinutos: int("duracao_minutos").notNull(),
+    questoesRespondidas: int("questoes_respondidas").notNull().default(0),
+    status: mysqlEnum("status", ["ativo", "finalizado", "expirado"]).notNull().default("ativo"),
+    pontuacaoFinal: decimal("pontuacao_final", { precision: 5, scale: 2 }),
+    acertos: int("acertos").notNull().default(0),
+    tempoGasto: int("tempo_gasto").notNull().default(0),
+  },
+  (table) => [
+    index("idx_sessoes_teste_usuario_status").on(table.usuarioId, table.status),
+    index("idx_sessoes_teste_usuario_inicio").on(table.usuarioId, table.inicio),
+  ],
+);
+
+export const respostasUsuario = mysqlTable(
+  "respostas_usuario",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    sessaoId: int("sessao_id")
+      .notNull()
+      .references(() => sessoesTeste.id, { onDelete: "cascade" }),
+    questaoId: int("questao_id")
+      .notNull()
+      .references(() => questoes.id, { onDelete: "cascade" }),
+    questaoNumero: int("questao_numero").notNull(),
+    respostaUsuario: text("resposta_usuario"),
+    respostaDissertativaUsuario: text("resposta_dissertativa_usuario"),
+    respostaCorreta: text("resposta_correta"),
+    estaCorreta: boolean("esta_correta").notNull().default(false),
+    dataResposta: datetime("data_resposta", { mode: "date" })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex("unique_resposta_sessao_questao").on(table.sessaoId, table.questaoNumero),
+    index("idx_respostas_usuario_questao").on(table.questaoId),
+  ],
+);
+
+export const resultadosTestes = mysqlTable(
+  "resultados_testes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    sessaoId: int("sessao_id")
+      .notNull()
+      .references(() => sessoesTeste.id, { onDelete: "cascade" }),
+    tipoProva: varchar("tipo_prova", { length: 20 }).notNull(),
+    pontuacao: decimal("pontuacao", { precision: 5, scale: 2 }).notNull(),
+    acertos: int("acertos").notNull(),
+    totalQuestoes: int("total_questoes").notNull(),
+    questoesRespondidas: int("questoes_respondidas").notNull(),
+    tempoGasto: int("tempo_gasto").notNull(),
+    dataRealizacao: datetime("data_realizacao", { mode: "date" })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("idx_resultados_testes_usuario_data").on(table.usuarioId, table.dataRealizacao),
+    index("idx_resultados_testes_sessao").on(table.sessaoId),
   ],
 );
 

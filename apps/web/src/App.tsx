@@ -9,6 +9,11 @@ import { HomePage } from "./features/public/HomePage.js";
 import { QuestionAdminPage } from "./features/questions/QuestionAdminPage.js";
 import { ForumPage } from "./features/forum/ForumPage.js";
 import { ForumAdminPage } from "./features/forum/ForumAdminPage.js";
+import {
+  SimulatorCatalogPage,
+  SimulatorOverviewPage,
+  SimulatorSessionPage,
+} from "./features/simulators/SimulatorPages.js";
 import "./styles.css";
 
 export function App() {
@@ -34,6 +39,9 @@ export function App() {
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/topics/:id" element={<ForumPage />} />
           <Route path="/admin/forum" element={<ForumAdminPage />} />
+          <Route path="/simulador" element={<SimulatorCatalogPage />} />
+          <Route path="/simulador/:tipo" element={<SimulatorOverviewPage />} />
+          <Route path="/simulador/sessoes/:id" element={<SimulatorSessionPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </BrowserRouter>

@@ -7,6 +7,7 @@ import { createApp } from "./app.js";
 import { MySqlAuthRepository } from "./auth/auth-repository.js";
 import { MySqlQuestionRepository } from "./questions/question-repository.js";
 import { MySqlForumRepository } from "./forum/forum-repository.js";
+import { MySqlSimulatorRepository } from "./simulators/simulator-repository.js";
 import { readApiConfig } from "./config.js";
 import * as schema from "./db/schema.js";
 
@@ -44,6 +45,10 @@ const app = createApp({
   forum: {
     auth: authOptions,
     repository: new MySqlForumRepository(db),
+  },
+  simulator: {
+    auth: authOptions,
+    repository: new MySqlSimulatorRepository(db),
   },
 });
 

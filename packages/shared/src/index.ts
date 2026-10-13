@@ -284,6 +284,115 @@ export type ImportedQuestion = z.infer<typeof ImportedQuestionSchema>;
 export type QuestionImportResponse = z.infer<typeof QuestionImportResponseSchema>;
 export type QuestionStatsResponse = z.infer<typeof QuestionStatsResponseSchema>;
 
+export const SimulatorExamTypeSchema = z.enum([
+  "toefl",
+  "ielts",
+  "sat",
+  "gre",
+  "dele",
+  "delf",
+  "testdaf",
+  "jlpt",
+  "hsk",
+]);
+
+export const SimulatorExamSchema = z.object({
+  tipo_prova: SimulatorExamTypeSchema,
+  nome: z.string(),
+  descricao: z.string(),
+  icone: z.string(),
+  cor: z.string(),
+  duracao: z.string(),
+  questoes: z.number().int().positive(),
+  duracao_minutos: z.number().int().positive(),
+  questoes_total: z.number().int().positive(),
+});
+
+export const SimulatorDashboardResponseSchema = z.object({
+  exams: z.array(SimulatorExamSchema),
+  stats: z.object({
+    total_testes: z.number().int().nonnegative(),
+    media_pontuacao: z.number().nullable(),
+  }),
+});
+
+export const SimulatorStartInputSchema = z.object({
+  tipo_prova: SimulatorExamTypeSchema,
+});
+
+export const SimulatorStartResponseSchema = z.object({
+  sessao_id: z.number().int().positive(),
+  tipo_prova: SimulatorExamTypeSchema,
+});
+
+export const SimulatorQuestionSchema = z.object({
+  id: z.number().int().positive(),
+  numero: z.number().int().positive(),
+  enunciado: z.string(),
+  tipo_questao: z.enum(["multipla_escolha", "dissertativa"]),
+  alternativas: z.record(z.string(), z.string()).optional(),
+  dificuldade: z.string().nullable(),
+  materia: z.string().nullable(),
+  assunto: z.string().nullable(),
+  explicacao: z.string().nullable(),
+});
+
+export const SimulatorSessionResponseSchema = z.object({
+  sessao_id: z.number().int().positive(),
+  tipo_prova: SimulatorExamTypeSchema,
+  nome: z.string(),
+  cor: z.string(),
+  status: z.enum(["ativo", "expirado"]),
+  tempo_restante: z.number().int().nonnegative(),
+  questoes_total: z.number().int().positive(),
+  questoes: z.array(SimulatorQuestionSchema),
+});
+
+export const SimulatorAnswerInputSchema = z.object({
+  sessao_id: z.number().int().positive(),
+  questao_numero: z.number().int().positive(),
+  resposta: z
+    .string()
+    .min(1)
+    .refine((value) => value !== "0"),
+  tipo_resposta: z.enum(["multipla_escolha", "dissertativa"]).default("multipla_escolha"),
+});
+
+export const SimulatorAnswerResponseSchema = z.object({
+  success: z.boolean(),
+  esta_correta: z.boolean().optional(),
+  tipo_resposta: z.enum(["multipla_escolha", "dissertativa"]).optional(),
+  questao_numero: z.number().int().positive().optional(),
+  message: z.string().optional(),
+  error: z.string().optional(),
+});
+
+export const SimulatorFinishInputSchema = z.object({
+  sessao_id: z.number().int().positive(),
+  finalizar: z.literal("1"),
+  respostas: z.record(z.string(), z.string()),
+});
+
+export const SimulatorFinishResponseSchema = z.object({
+  sucesso: z.literal(true),
+  pontuacao: z.number().nonnegative(),
+  acertos: z.number().int().nonnegative(),
+  questoes_respondidas: z.number().int().nonnegative(),
+  tempo_gasto: z.number().int().nonnegative(),
+});
+
+export const SimulatorErrorResponseSchema = z.object({
+  success: z.literal(false),
+  error: z.string(),
+});
+
+export type SimulatorExamType = z.infer<typeof SimulatorExamTypeSchema>;
+export type SimulatorExam = z.infer<typeof SimulatorExamSchema>;
+export type SimulatorQuestion = z.infer<typeof SimulatorQuestionSchema>;
+export type SimulatorDashboardResponse = z.infer<typeof SimulatorDashboardResponseSchema>;
+export type SimulatorSessionResponse = z.infer<typeof SimulatorSessionResponseSchema>;
+export type SimulatorFinishResponse = z.infer<typeof SimulatorFinishResponseSchema>;
+
 const PhpTrimmedForumStringSchema = z.string().transform(trimPhpInput);
 const RequiredForumStringSchema = PhpTrimmedForumStringSchema.refine((value) => !isPhpEmpty(value));
 
