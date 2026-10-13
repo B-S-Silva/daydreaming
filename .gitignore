@@ -9,6 +9,7 @@ config.php
 !apps/api/schema/questions.sql
 !apps/api/schema/forum.sql
 !apps/api/schema/simulators.sql
+!apps/api/schema/expansion.sql
 *.db
 *.sqlite
 *.sqlite3

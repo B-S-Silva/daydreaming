@@ -12,9 +12,27 @@ const features = [
   {
     icon: "🌍",
     title: "Cobertura Global",
-    description:
-      "Informações sobre testes de proficiência para mais de 15 países em 5 continentes diferentes.",
+    description: "Informações sobre testes de proficiência e preparação internacional.",
     href: "/exames-internacionais",
+  },
+  {
+    icon: "🧭",
+    title: "Guias por País",
+    description: "Explore guias de candidatura, bolsas e planejamento para 28 destinos de estudo.",
+    href: "/guias-paises",
+  },
+  {
+    icon: "📚",
+    title: "Ferramentas de Estudo",
+    description:
+      "Estime seu GPA, explore interesses profissionais e pratique respostas para entrevistas.",
+    href: "/ferramentas-estudo",
+  },
+  {
+    icon: "🏛️",
+    title: "Ranking Universitário",
+    description: "Compare 89 universidades por país, região, posição e pontuação.",
+    href: "/ranking",
   },
   {
     icon: "📊",
@@ -101,8 +119,8 @@ export function HomePage() {
         <section className="stats page-section">
           <div className="content-width stats-grid">
             <div>
-              <strong>15+</strong>
-              <span>Países Disponíveis</span>
+              <strong>28</strong>
+              <span>Guias de Países</span>
             </div>
             <div>
               <strong>30+</strong>
@@ -134,7 +152,8 @@ export function HomePage() {
         </section>
       </main>
       <footer className="site-footer">
-        <p>© 2024 StudyAbroad. Transformando sonhos em realidade. ✈️🎓</p>
+        <p>DayDreaming — planejamento e preparação para estudar no exterior.</p>
+        <Link to="/quem-somos">Quem somos</Link>
       </footer>
     </>
   );

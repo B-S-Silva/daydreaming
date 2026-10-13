@@ -4,6 +4,8 @@ import { AuthErrorResponseSchema, HealthResponseSchema } from "@daydreaming/shar
 import type { AuthRouteOptions } from "./auth/auth-routes.js";
 import { registerAuthRoutes } from "./auth/auth-routes.js";
 import { getInternationalExamCatalog } from "./public/international-exams.js";
+import { findCountryGuide, listCountryGuides } from "./public/country-guides.js";
+import { registerUniversityRankingRoutes } from "./public/university-ranking-routes.js";
 import type { QuestionRouteOptions } from "./questions/question-routes.js";
 import { registerQuestionRoutes } from "./questions/question-routes.js";
 import type { ForumRouteOptions } from "./forum/forum-routes.js";
@@ -12,6 +14,10 @@ import type { SimulatorRouteOptions } from "./simulators/simulator-routes.js";
 import { registerSimulatorRoutes } from "./simulators/simulator-routes.js";
 import type { ResultsRouteOptions } from "./results/results-routes.js";
 import { registerResultsRoutes } from "./results/results-routes.js";
+import type { StudyRouteOptions } from "./study/study-routes.js";
+import { registerStudyRoutes } from "./study/study-routes.js";
+import type { NotificationRouteOptions } from "./notifications/notification-routes.js";
+import { registerNotificationRoutes } from "./notifications/notification-routes.js";
 
 export interface CreateAppOptions {
   auth?: AuthRouteOptions;
@@ -19,13 +25,23 @@ export interface CreateAppOptions {
   forum?: ForumRouteOptions;
   simulator?: SimulatorRouteOptions;
   results?: ResultsRouteOptions;
+  study?: StudyRouteOptions;
+  notifications?: NotificationRouteOptions;
   logger?: boolean;
 }
 
 export function createApp(options: CreateAppOptions = {}) {
   const app = Fastify({ logger: options.logger ?? false });
 
-  if (options.auth || options.questions || options.forum || options.simulator || options.results) {
+  if (
+    options.auth ||
+    options.questions ||
+    options.forum ||
+    options.simulator ||
+    options.results ||
+    options.study ||
+    options.notifications
+  ) {
     app.register(rateLimit, {
       global: false,
       errorResponseBuilder: (_request, context) =>
@@ -44,7 +60,31 @@ export function createApp(options: CreateAppOptions = {}) {
     return reply.code(200).send(getInternationalExamCatalog());
   });
 
-  if (options.auth || options.questions || options.forum || options.simulator || options.results) {
+  app.get("/api/public/country-guides", async (_request, reply) => {
+    return reply.code(200).send(listCountryGuides());
+  });
+
+  app.get<{ Params: { id: string } }>("/api/public/country-guides/:id", async (request, reply) => {
+    const guide = findCountryGuide(request.params.id);
+    if (!guide) {
+      return reply
+        .code(404)
+        .send(AuthErrorResponseSchema.parse({ message: "Guia de país não encontrado." }));
+    }
+    return reply.code(200).send(guide);
+  });
+
+  registerUniversityRankingRoutes(app);
+
+  if (
+    options.auth ||
+    options.questions ||
+    options.forum ||
+    options.simulator ||
+    options.results ||
+    options.study ||
+    options.notifications
+  ) {
     app.register(async (authApp) => {
       if (options.auth) {
         registerAuthRoutes(authApp, options.auth);
@@ -60,6 +100,12 @@ export function createApp(options: CreateAppOptions = {}) {
       }
       if (options.results) {
         registerResultsRoutes(authApp, options.results);
+      }
+      if (options.study) {
+        registerStudyRoutes(authApp, options.study);
+      }
+      if (options.notifications) {
+        registerNotificationRoutes(authApp, options.notifications);
       }
     });
   }

@@ -91,6 +91,7 @@ function createForumApp(isAdmin = false) {
     listReplies: vi.fn(async () => [reply]),
     createTopic: vi.fn(async () => {}),
     createReply: vi.fn(async () => {}),
+    notifyReply: vi.fn(async () => {}),
     createLike: vi.fn(async () => {}),
     moderateTopic: vi.fn(async () => true),
     moderateReply: vi.fn(async () => true),

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { AuthApiError, getCurrentUser, logout } from "./auth-api.js";
+import { NotificationBell } from "../notifications/NotificationBell.js";
 
 interface AuthPageLayoutProps {
   title: string;
@@ -49,6 +50,14 @@ export function PublicHeader() {
         <Link className="public-header__home" to="/">
           🏠 Página Inicial
         </Link>
+        <Link className="public-header__home" to="/ferramentas-estudo">
+          📚 Ferramentas de estudo
+        </Link>
+        {currentUser?.authenticated && (
+          <Link className="public-header__home" to="/perfil">
+            👤 Meu perfil
+          </Link>
+        )}
         {currentUser?.authenticated && currentUser.user.isAdmin && (
           <Link className="public-header__home" to="/admin/questoes">
             📝 Gerenciar Questões
@@ -63,6 +72,9 @@ export function PublicHeader() {
           <Link className="public-header__home" to="/admin/forum">
             ⚙️ Admin do Fórum
           </Link>
+        )}
+        {currentUser?.authenticated && (
+          <NotificationBell authenticated csrfToken={currentUser.csrfToken} />
         )}
       </div>
       {currentUser?.authenticated ? (

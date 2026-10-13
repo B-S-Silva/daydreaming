@@ -190,3 +190,9 @@ SMTP não deve ser configurado como se já existisse: só acrescentar SMTP/provi
 3. Rodar PHP existente contra banco isolado para fixtures de login/cadastro/fórum/importação/resposta/finalização e registrar HTTP, redirects, mensagens, JSON e efeitos transacionais sem alterações ao banco compartilhado.
 4. Definir recuperação de senha real e plano de compatibilidade de sessões/cookies PHP/Node antes de cortar auth.
 5. Confirmar que credenciais de exemplo em `README.md` são apenas documentação e nunca dados de produção.
+
+## Atualização do snapshot PHP mais recente
+
+A atualização em TypeScript acrescentou diretório/detalhes públicos para 28 guias de países, ferramentas de GPA/quiz vocacional/prática de entrevista e perfil acadêmico privado. O perfil, o histórico de GPA e o tracking consentido usam novas rotas Fastify e um DDL aditivo em `apps/api/schema/expansion.sql`; esse DDL ainda não foi aplicado a nenhum banco. A conversão GPA e recomendações são explicitamente estimativas/exploratórias. O perfil não é público e o consentimento de tracking começa desligado.
+
+O ranking foi migrado com os 89 registros do `ranking.php` canônico; o inventário inicial de 65 registros era uma contagem incompleta. Gamificação/notificações permanecem pendentes. As diferenças e o estado detalhado estão em `MIGRACAO.md`.

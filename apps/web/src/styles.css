@@ -244,6 +244,196 @@ select {
   font-size: 0.875rem;
 }
 
+.country-guides-page {
+  padding: 36px 0 64px;
+}
+
+.guide-search {
+  display: grid;
+  max-width: 560px;
+  gap: 6px;
+  margin: 0 auto 24px;
+  font-weight: 600;
+}
+
+.guide-search input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #c9ced6;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.guide-card,
+.guide-section {
+  padding: 22px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 10px #00000012;
+}
+
+.guide-card h2 {
+  margin-top: 0;
+}
+
+.guide-card .button {
+  display: inline-block;
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+.guide-disclaimer {
+  margin: 24px 0;
+  padding: 14px 18px;
+  border-left: 4px solid #d89b27;
+  background: #fff8e8;
+  color: #51452e;
+  font-size: 0.9rem;
+}
+
+.guide-section {
+  margin: 18px auto;
+  max-width: 900px;
+}
+
+.study-page {
+  padding: 36px 0 64px;
+}
+
+.study-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.study-tabs button {
+  padding: 10px 16px;
+  border: 1px solid #c9ced6;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.study-tabs button[aria-pressed="true"] {
+  border-color: #4b55c5;
+  color: #fff;
+  background: #4b55c5;
+}
+
+.study-tool-card,
+.profile-form {
+  display: grid;
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 10px #00000012;
+}
+
+.study-tool-card > h2,
+.study-tool-card > p,
+.profile-form > p {
+  margin: 0;
+}
+
+.gpa-rows {
+  display: grid;
+  gap: 12px;
+}
+
+.gpa-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.gpa-row label,
+.profile-form label,
+.interview-answer {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.gpa-row input,
+.profile-form input,
+.profile-form textarea,
+.interview-answer textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #c9ced6;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.gpa-result {
+  font-size: 1.2rem;
+}
+
+.career-questions {
+  display: grid;
+  gap: 12px;
+}
+
+.career-questions fieldset {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid #d8dce3;
+  border-radius: 8px;
+}
+
+.career-questions legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.career-questions label {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+}
+
+.career-result {
+  padding: 18px;
+  border-radius: 8px;
+  background: #f2f4ff;
+}
+
+.interview-answer {
+  margin: 16px 0;
+}
+
+.profile-form .consent-check {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+}
+
+.profile-form .consent-check input {
+  width: auto;
+  min-height: auto;
+  margin-top: 5px;
+}
+
+@media (max-width: 640px) {
+  .gpa-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .review-summary {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
@@ -486,6 +676,67 @@ select {
 
 .public-header__login {
   padding: 8px 16px;
+}
+
+.profile-badges {
+  margin-top: 32px;
+  padding: 24px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 10px #00000012;
+}
+
+.profile-badges > header h2 {
+  margin: 0 0 6px;
+}
+
+.profile-badges > header p {
+  margin-top: 0;
+  color: #667085;
+}
+
+.profile-badges__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.profile-badge {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid #e3e7eb;
+  border-radius: 10px;
+}
+
+.profile-badge--raro {
+  border-color: #a9c6ec;
+}
+
+.profile-badge--epico {
+  border-color: #c5a6e8;
+  background: #faf7ff;
+}
+
+.profile-badge--lendario {
+  border-color: #e4c35b;
+  background: #fffdf3;
+}
+
+.profile-badge > span {
+  font-size: 2rem;
+}
+
+.profile-badge h3,
+.profile-badge p {
+  margin: 0;
+}
+
+.profile-badge time,
+.profile-badge small {
+  color: #667085;
+  font-size: 0.8rem;
 }
 
 .hero {

@@ -1,6 +1,6 @@
 # DayDreaming
 
-Plataforma para preparação de exames internacionais, com autenticação, fórum, simulados, resultados e administração de questões. O runtime atual é um monorepo TypeScript com frontend React/Vite e API Fastify; o código PHP legado foi removido.
+Plataforma para preparação de exames internacionais, com autenticação, fórum, simulados, resultados, administração de questões, guias por país e ferramentas de estudo. O runtime atual é um monorepo TypeScript com frontend React/Vite e API Fastify; o código PHP legado foi removido.
 
 ## Requisitos
 
@@ -34,6 +34,8 @@ npm run dev
 ```
 
 O Vite serve o frontend em `http://localhost:5173` e encaminha `/api` para o Fastify em `http://localhost:3001`.
+
+Rotas adicionadas incluem `/guias-paises`, `/quem-somos`, `/ranking`, `/ferramentas-estudo` e `/perfil`. Perfil e gravação do histórico de GPA requerem as tabelas novas descritas em `apps/api/schema/expansion.sql`; o arquivo é aditivo, não é executado automaticamente e exige revisão do banco-alvo antes de aplicar.
 
 ## Validação e build
 

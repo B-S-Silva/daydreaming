@@ -269,3 +269,138 @@ export const forumModeracao = mysqlTable(
     index("idx_forum_moderacao_resposta").on(table.respostaId),
   ],
 );
+
+export const perfilUsuario = mysqlTable(
+  "perfil_usuario",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    escola: varchar("escola", { length: 150 }),
+    serie: varchar("serie", { length: 50 }),
+    localizacao: varchar("localizacao", { length: 150 }),
+    gpa: decimal("gpa", { precision: 3, scale: 2 }),
+    idiomas: text("idiomas"),
+    exames: text("exames"),
+    interesses: varchar("interesses", { length: 255 }),
+    biografia: text("biografia"),
+    rastreamentoPaises: boolean("rastreamento_paises").notNull().default(false),
+    dataAtualizacao: timestamp("data_atualizacao", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("unique_perfil_usuario").on(table.usuarioId)],
+);
+
+export const usuarioGpa = mysqlTable(
+  "usuario_gpa",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    gpa: decimal("gpa", { precision: 3, scale: 2 }).notNull(),
+    notasUtilizadas: text("notas_utilizadas").notNull(),
+    dataCalculo: datetime("data_calculo", { mode: "date" })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("idx_usuario_gpa_usuario_data").on(table.usuarioId, table.dataCalculo),
+    index("idx_usuario_gpa_gpa").on(table.gpa),
+  ],
+);
+
+export const historicoAtividades = mysqlTable(
+  "historico_atividades",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    tipo: varchar("tipo", { length: 50 }).notNull(),
+    descricao: varchar("descricao", { length: 255 }).notNull(),
+    detalhes: text("detalhes"),
+    pontos: int("pontos").notNull().default(0),
+    dataAtividade: datetime("data_atividade", { mode: "date" })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("idx_historico_atividades_usuario_data").on(table.usuarioId, table.dataAtividade),
+  ],
+);
+
+export const paisesVisitados = mysqlTable(
+  "paises_visitados",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    codigoPais: varchar("codigo_pais", { length: 10 }).notNull(),
+    nomePais: varchar("nome_pais", { length: 100 }).notNull(),
+    primeiraVisita: datetime("primeira_visita", { mode: "date" })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    ultimaVisita: datetime("ultima_visita", { mode: "date" })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    totalVisitas: int("total_visitas").notNull().default(1),
+  },
+  (table) => [
+    uniqueIndex("unique_pais_visitado_usuario_codigo").on(table.usuarioId, table.codigoPais),
+    index("idx_paises_visitados_usuario").on(table.usuarioId),
+  ],
+);
+
+export const badges = mysqlTable("badges", {
+  id: int("id").autoincrement().primaryKey(),
+  codigo: varchar("codigo", { length: 50 }).notNull().unique(),
+  nome: varchar("nome", { length: 100 }).notNull(),
+  descricao: text("descricao").notNull(),
+  icone: varchar("icone", { length: 10 }).notNull(),
+  tipo: varchar("tipo", { length: 30 }).notNull(),
+  categoria: varchar("categoria", { length: 30 }),
+  condicaoValor: int("condicao_valor"),
+  raridade: varchar("raridade", { length: 20 }),
+  experienciaBonus: int("experiencia_bonus"),
+  ativa: boolean("ativa").default(true),
+  dataCriacao: timestamp("data_criacao", { mode: "date" }).defaultNow(),
+});
+
+export const usuarioBadges = mysqlTable(
+  "usuario_badges",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    badgeId: int("badge_id")
+      .notNull()
+      .references(() => badges.id, { onDelete: "cascade" }),
+    dataConquista: datetime("data_conquista", { mode: "date" }).notNull(),
+    contexto: varchar("contexto", { length: 100 }),
+    notificado: boolean("notificado").default(false),
+    dataCriacao: timestamp("data_criacao", { mode: "date" }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("unique_usuario_badge").on(table.usuarioId, table.badgeId),
+    index("idx_usuario_badges_data").on(table.usuarioId, table.dataConquista),
+  ],
+);
+
+export const niveisUsuario = mysqlTable(
+  "niveis_usuario",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    usuarioId: int("usuario_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    nivelAtual: int("nivel_atual").notNull().default(1),
+    experienciaTotal: int("experiencia_total").notNull().default(0),
+    experienciaNivel: int("experiencia_nivel").notNull().default(0),
+    experienciaNecessaria: int("experiencia_necessaria").notNull().default(100),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("unique_niveis_usuario").on(table.usuarioId)],
+);

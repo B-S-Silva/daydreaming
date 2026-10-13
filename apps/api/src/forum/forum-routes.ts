@@ -138,8 +138,15 @@ export function registerForumRoutes(app: FastifyInstance, options: ForumRouteOpt
         .send(AuthErrorResponseSchema.parse({ message: "Autenticação necessária." }));
     }
     try {
-      const message = await service.createReply(session.user.id, request.body);
-      return reply.code(201).send(ForumMutationResponseSchema.parse({ success: true, message }));
+      const result = await service.createReply(session.user.id, request.body);
+      try {
+        await options.repository.notifyReply(result.topicId, session.user.id, result.content);
+      } catch (error) {
+        request.log.error({ err: error }, "Could not create forum reply notifications.");
+      }
+      return reply
+        .code(201)
+        .send(ForumMutationResponseSchema.parse({ success: true, message: result.message }));
     } catch (error) {
       return sendFailure(request, reply, error, "Não foi possível adicionar a resposta.");
     }

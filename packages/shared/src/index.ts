@@ -641,3 +641,149 @@ export type ForumReply = z.infer<typeof ForumReplySchema>;
 export type ForumAdminDashboardResponse = z.infer<typeof ForumAdminDashboardResponseSchema>;
 export type ForumAdminUser = z.infer<typeof ForumAdminUserSchema>;
 export type ForumModerationLog = z.infer<typeof ForumModerationLogSchema>;
+
+export const CountryGuideSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  flag: z.string(),
+  continent: ContinentSchema,
+  description: z.string(),
+  highlights: z.array(z.string()),
+});
+
+export const CountryGuideSchema = CountryGuideSummarySchema.extend({
+  sections: z.array(
+    z.object({
+      title: z.string(),
+      paragraphs: z.array(z.string()),
+      links: z.array(z.object({ label: z.string(), url: z.url() })),
+    }),
+  ),
+});
+
+export const CountryGuideListResponseSchema = z.object({
+  items: z.array(CountryGuideSummarySchema),
+});
+
+export const UniversityDetailSchema = z.object({
+  title: z.string(),
+  value: z.string(),
+  description: z.string(),
+});
+
+export const UniversitySchema = z.object({
+  id: z.string(),
+  rank: z.number().int().positive(),
+  name: z.string(),
+  country: z.string(),
+  countryCode: z.string(),
+  region: z.string(),
+  score: z.number().nonnegative(),
+  logo: z.string(),
+  location: z.string(),
+  details: z.array(UniversityDetailSchema),
+});
+
+export const UniversityListResponseSchema = z.object({
+  items: z.array(UniversitySchema),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+});
+
+export const CountryExplorationResponseSchema = z.object({
+  explored: z.boolean(),
+});
+
+export const GpaGradeSchema = z.object({
+  subject: z.string().trim().min(1).max(100),
+  grade: z.number().min(0).max(10),
+});
+
+export const SaveGpaInputSchema = z.object({
+  gpa: z.number().min(0).max(4),
+  grades: z.array(GpaGradeSchema).min(1).max(30),
+});
+
+export const SaveGpaResponseSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+});
+
+export const StudentProfileSchema = z.object({
+  school: z.string().nullable(),
+  grade: z.string().nullable(),
+  location: z.string().nullable(),
+  gpa: z.number().min(0).max(4).nullable(),
+  languages: z.array(z.string()),
+  exams: z.array(z.string()),
+  interests: z.string().nullable(),
+  bio: z.string().nullable(),
+  countryTrackingEnabled: z.boolean(),
+});
+
+export const UpdateStudentProfileInputSchema = StudentProfileSchema.omit({
+  gpa: true,
+}).extend({
+  school: z.string().trim().max(150).nullable(),
+  grade: z.string().trim().max(50).nullable(),
+  location: z.string().trim().max(150).nullable(),
+  gpa: z.number().min(0).max(4).nullable(),
+  languages: z.array(z.string().trim().min(1).max(50)).max(20),
+  exams: z.array(z.string().trim().min(1).max(50)).max(20),
+  interests: z.string().trim().max(255).nullable(),
+  bio: z.string().trim().max(2000).nullable(),
+});
+
+export const StudentProfileResponseSchema = z.object({
+  profile: StudentProfileSchema,
+});
+
+export const StudyMutationResponseSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+});
+
+export const NotificationSchema = z.object({
+  id: z.number().int().positive(),
+  type: z.enum(["forum_reply", "forum_mention", "badge", "level", "system"]),
+  title: z.string(),
+  message: z.string(),
+  link: z.string().nullable(),
+  read: z.boolean(),
+  createdAt: z.string(),
+});
+
+export const NotificationListResponseSchema = z.object({
+  items: z.array(NotificationSchema),
+  unreadCount: z.number().int().nonnegative(),
+});
+
+export const NotificationMutationResponseSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+});
+
+export const BadgeSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  description: z.string(),
+  icon: z.string(),
+  category: z.enum(["provas", "forum", "gpa", "paises", "outros"]),
+  rarity: z.enum(["comum", "raro", "epico", "lendario"]),
+  acquiredAt: z.string(),
+  context: z.string().nullable(),
+});
+
+export const UserBadgesResponseSchema = z.object({
+  items: z.array(BadgeSchema),
+});
+
+export type CountryGuideSummary = z.infer<typeof CountryGuideSummarySchema>;
+export type CountryGuide = z.infer<typeof CountryGuideSchema>;
+export type University = z.infer<typeof UniversitySchema>;
+export type SaveGpaInput = z.infer<typeof SaveGpaInputSchema>;
+export type StudentProfile = z.infer<typeof StudentProfileSchema>;
+export type UpdateStudentProfileInput = z.infer<typeof UpdateStudentProfileInputSchema>;
+export type Notification = z.infer<typeof NotificationSchema>;
+export type Badge = z.infer<typeof BadgeSchema>;

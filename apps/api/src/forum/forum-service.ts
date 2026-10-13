@@ -133,13 +133,20 @@ export class ForumService {
     return "Tópico criado e publicado com sucesso!";
   }
 
-  async createReply(userId: number, rawInput: unknown): Promise<string> {
+  async createReply(
+    userId: number,
+    rawInput: unknown,
+  ): Promise<{ message: string; topicId: number; content: string }> {
     const parsed = ForumReplyInputSchema.safeParse(rawInput);
     if (!parsed.success) {
       throw new ForumValidationError("Digite o conteúdo da resposta.");
     }
     await this.repository.createReply(parsed.data.topico_id, userId, parsed.data.conteudo);
-    return "Resposta adicionada com sucesso!";
+    return {
+      message: "Resposta adicionada com sucesso!",
+      topicId: parsed.data.topico_id,
+      content: parsed.data.conteudo,
+    };
   }
 
   async like(userId: number, rawInput: unknown): Promise<void> {

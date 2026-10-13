@@ -18,6 +18,7 @@ export interface ForumRepository {
   listReplies(topicId: number): Promise<ForumReply[]>;
   createTopic(categoryId: number, userId: number, title: string, content: string): Promise<void>;
   createReply(topicId: number, userId: number, content: string): Promise<void>;
+  notifyReply(topicId: number, userId: number, content: string): Promise<void>;
   createLike(userId: number, type: "topico" | "resposta", id: number): Promise<void>;
   moderateTopic(
     moderatorId: number,
@@ -247,6 +248,59 @@ export class MySqlForumRepository implements ForumRepository {
       usuarioId: userId,
       conteudo: content,
       aprovado: true,
+    });
+  }
+
+  async notifyReply(topicId: number, userId: number, content: string): Promise<void> {
+    await this.db.transaction(async (transaction) => {
+      const [topic] = await transaction
+        .select({
+          ownerId: schema.forumTopicos.usuarioId,
+          title: schema.forumTopicos.titulo,
+        })
+        .from(schema.forumTopicos)
+        .where(eq(schema.forumTopicos.id, topicId))
+        .limit(1);
+      const [author] = await transaction
+        .select({ name: schema.usuarios.nome })
+        .from(schema.usuarios)
+        .where(eq(schema.usuarios.id, userId))
+        .limit(1);
+      if (!topic || !author) {
+        return;
+      }
+
+      const link = `/forum/topics/${topicId}`;
+      if (topic.ownerId !== null && topic.ownerId !== userId) {
+        await transaction.insert(schema.notificacoesUsuario).values({
+          usuarioId: topic.ownerId,
+          tipo: "forum_resposta",
+          titulo: "Nova resposta no seu tópico",
+          mensagem: `${author.name} respondeu ao seu tópico "${topic.title}"`,
+          link,
+        });
+      }
+
+      const usernames = [...content.matchAll(/@([a-zA-Z0-9_]+)/g)].map((match) => match[1]);
+      for (const username of usernames) {
+        if (!username) {
+          continue;
+        }
+        const [mentionedUser] = await transaction
+          .select({ id: schema.usuarios.id })
+          .from(schema.usuarios)
+          .where(eq(schema.usuarios.usuario, username))
+          .limit(1);
+        if (mentionedUser && mentionedUser.id !== userId) {
+          await transaction.insert(schema.notificacoesUsuario).values({
+            usuarioId: mentionedUser.id,
+            tipo: "forum_mencao",
+            titulo: "Você foi mencionado no fórum",
+            mensagem: `${author.name} mencionou você no tópico "${topic.title}"`,
+            link,
+          });
+        }
+      }
     });
   }
 

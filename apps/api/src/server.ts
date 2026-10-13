@@ -9,6 +9,8 @@ import { MySqlQuestionRepository } from "./questions/question-repository.js";
 import { MySqlForumRepository } from "./forum/forum-repository.js";
 import { MySqlSimulatorRepository } from "./simulators/simulator-repository.js";
 import { MySqlResultsRepository } from "./results/results-repository.js";
+import { MySqlStudyRepository } from "./study/study-repository.js";
+import { MySqlNotificationRepository } from "./notifications/notification-repository.js";
 import { readApiConfig } from "./config.js";
 import * as schema from "./db/schema.js";
 
@@ -54,6 +56,14 @@ const app = createApp({
   results: {
     auth: authOptions,
     repository: new MySqlResultsRepository(db),
+  },
+  study: {
+    auth: authOptions,
+    repository: new MySqlStudyRepository(db),
+  },
+  notifications: {
+    auth: authOptions,
+    repository: new MySqlNotificationRepository(db),
   },
 });
 
