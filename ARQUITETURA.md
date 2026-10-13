@@ -2,9 +2,9 @@
 
 ## Escopo e evidências
 
-Esta arquitetura registra a análise estática aprovada na Fase 1. A limpeza anterior removeu `LIMPEZA.md` quando os Markdown antigos foram excluídos. Usei `AGENTS.MD`, o `README.md` preservado e inspeção estática dos PHP, HTML, SQL e arquivos JSON atuais. PHP não está disponível. O MySQL foi provisionado para desenvolvimento e as tabelas de autenticação/logs foram inspecionadas; schema dos demais módulos, contratos em execução e paridade ainda exigem validação em ambiente seguro.
+Esta arquitetura registra a análise estática aprovada na Fase 1 e permanece como inventário histórico do runtime PHP, removido do repositório após validação e autorização do responsável. A documentação atual de execução está em `README.md`, e as regras de desenvolvimento estão em `AGENTS.MD`. O PHP legada não conectava pela configuração local; a API TypeScript conecta ao MySQL via `.env`. Uma comparação autenticada parcial foi executada no schema de staging isolado; nenhum schema/dado de desenvolvimento foi alterado.
 
-Fase 2 está em andamento na branch `migracao/typescript`. O setup, o módulo público, o fórum e simulados/respostas foram commitados; autenticação usa a API TypeScript e o banco de desenvolvimento dedicado. Resultado, revisão e histórico estão implementados em uma etapa ainda não commitada. `node_sessions`, `questoes`, tabelas do fórum e as três tabelas novas de simulados foram adicionadas somente após autorização; nenhuma tabela ou dado PHP existente foi alterado. A etapa de resultados reutiliza essas tabelas sem DDL ou seed.
+Fase 2 foi validada pelo responsável do projeto. O setup, conteúdo público, autenticação, questões, fórum, simulados, resultados/revisão/histórico estão implementados em TypeScript; type-check, lint, testes, formatação e build passam. A validação autenticada executada usou fixtures sintéticas em `daydreaming_parity_staging`; divergências históricas e limites aceitos estão descritos em `MIGRACAO.md`. As tabelas do simulador no schema de desenvolvimento permanecem sem questões, sessões ou resultados de teste. O PHP versionado foi removido; configurações locais, banco, schemas e dados foram preservados.
 
 ## Mapa do sistema atual
 
@@ -62,7 +62,7 @@ Domínios: usuários/autenticação (credenciais, papel, conta ativa, timestamps
 
 **Bloqueio de schema:** não se deve gerar o modelo ORM definitivo a partir de um único script SQL. Os scripts divergem entre si e em relação ao runtime: `forum_topicos` usa `autor_id` ou `usuario_id`; `questoes` alterna `ativa`/`ativo`; `sessoes_teste` alterna `pontuacao_final`/`pontuacao`, `questoes_total` e outras colunas; `forum_moderacao`, `logs_acesso`, `respostas_usuario`, `badges` também têm layouts diferentes. As consultas em `admin_questoes.php` usam `ativo` e `created_at` e `questoes_manager.php` usa `ativa`; `historico_testes.php` usa a chave de sessão diferente. O schema realmente instalado e os dados existentes são a fonte da verdade.
 
-Na Fase 2: obter aprovação/acesso a uma cópia segura ou ambiente de desenvolvimento; inspecionar `INFORMATION_SCHEMA` sem DDL/DML; registrar schema e índices/FKs; reconciliar colunas do runtime e scripts; gerar modelos Drizzle por introspecção; manter as tabelas sem alteração. Não imprimir credenciais nem consultar dados pessoais no inventário.
+Na Fase 2, a introspecção de `INFORMATION_SCHEMA` foi feita sem ler dados pessoais. Para validação executável foi criado o schema isolado `daydreaming_parity_staging`, com as estruturas de 13 tabelas, suas 18 chaves estrangeiras e fixtures sintéticas; nenhum dado do schema de desenvolvimento foi copiado. A conexão PHP legada não foi alterada: os testes usaram uma cópia temporária do código PHP com configuração de staging. A paridade autenticada foi confirmada parcialmente para login, resultados/históricos e finalização do simulado; fórum, importação/admin e os demais casos continuam pendentes. Não imprimir credenciais nem consultar dados pessoais no inventário.
 
 ### Autenticação, sessão e segurança atual
 

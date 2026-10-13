@@ -2,19 +2,19 @@
 
 ## Estado e limites
 
-Fase 1 aprovada; Fase 2 em execução na branch `migracao/typescript`. O setup do monorepo está no commit `a70d363`; o módulo público está no commit `4ee7d75`; autenticação usa sessão server-side no MySQL de desenvolvimento. O fórum foi commitado em `181c633`, simulados/respostas em `4477147`; resultados, revisão e histórico estão implementados nesta etapa, aguardando gates e commit. Tabelas criadas para as features TS não receberam seed; tabelas PHP existentes foram preservadas.
+Fase 1 e Fase 2 foram validadas pelo responsável; o cutover para TypeScript foi autorizado e os arquivos PHP versionados foram removidos. O setup do monorepo está no commit `a70d363`; o módulo público está no commit `4ee7d75`; o fórum em `181c633`, simulados/respostas em `4477147` e resultados/revisão/histórico em `6abd4de`. Testes, type-check, lint, formatação e build passaram. As diferenças aceitas e a validação pareada parcial estão registradas em `MIGRACAO.md`. Banco, schema e dados de desenvolvimento foram preservados.
 
 O `LIMPEZA.md` referenciado no pedido não está no checkout: ele foi excluído na solicitação anterior para remover todos os Markdown exceto `README.md`; a base de conhecimento atual é `AGENTS.MD`.
 
-## Bloqueios conhecidos a resolver antes de declarar paridade
+## Diferenças técnicas documentadas no aceite
 
 1. **Schema não confiável por scripts:** arquivos PHP/SQL declaram colunas diferentes para fórum, questões, sessões e logs. Autenticação/logs, questões, fórum e as tabelas novas de sessão/resposta/resultado foram mapeados; as tabelas novas de resultado seguem sem dados de teste. Badges permanecem fora da migração. Nenhum `setup_database.php`, `reset_database.sql`, `drizzle-kit push` ou script de correção deve ser executado.
 2. **Sessão/ID inconsistente:** login define `usuario_id`; `historico_testes.php` consulta `$_SESSION['user_id']`. O endpoint TS usa o ID autenticado da sessão Node (`usuario_id`) para carregar o histórico, corrigindo essa incompatibilidade legada. `admin_questoes.php` exige `tipo_usuario === 'admin'`, enquanto autenticação grava `is_admin`; a API usa o papel confiável `isAdmin` da sessão Node, não um campo enviado pelo cliente.
 3. **Pontuação de dissertativa divergente:** `salvar_resposta.php` aceita igualdade ou resposta esperada contida; `processar_teste.php` só aceita igualdade normalizada. Total geral é calculado pelas respostas, mas `total_questoes` persiste constante 120. Fechamento também pode salvar respostas novamente; transação e duplicidade precisam de fixture.
 4. **Recuperação de senha não é fluxo real:** token é gerado e descartado, sem email e sem endpoint de redefinição. A paridade atual é preservar a tela/mensagem simulada, não prometer funcionalidade nova.
 5. **Sessão PHP não pode ser lida automaticamente pelo Node:** cookie e store Node já foram definidos; coexistência e cutover coordenado continuam pendentes para não desconectar usuários inadvertidamente.
-6. **Ambiente sem validação executável prévia:** PHP e Composer não estavam disponíveis na inspeção de limpeza; falta suíte automatizada. Criar ambiente e baseline isolados é um gate inicial.
-7. **Scripts de manutenção na raiz:** podem ser diretamente executáveis pelo web server e alterar schema/dados. Não expor a API SPA nem rodá-los automaticamente.
+6. **Paridade pareada limitada:** a comparação PHP↔TS executada em staging cobriu login, resultado/revisão/históricos e finalização do simulado com fixtures sintéticas. O responsável validou a migração; as diferenças conhecidas são mantidas em `MIGRACAO.md`.
+7. **Scripts SQL preservados:** arquivos de manutenção ainda podem alterar schema/dados se executados manualmente. Inspecione-os e confirme o destino antes de qualquer execução.
 
 ## Sequência macro e gates
 
@@ -24,9 +24,9 @@ O `LIMPEZA.md` referenciado no pedido não está no checkout: ele foi excluído 
 - `PLANO_MIGRACAO.md`: sequência, gates, riscos e critérios abaixo.
 - A arquitetura foi validada antes do início da implementação.
 
-### Fase 2 — em execução: setup e módulos verticais
+### Fase 2 — concluída e validada: setup e módulos verticais
 
-1. Branch `migracao/typescript` criada; PHP permanece intacto.
+1. Branch `migracao/typescript` criada. O PHP permaneceu intacto durante a migração e foi removido após validação/autorização explícita do responsável.
 2. Setup npm workspaces, TypeScript strict, ESLint, Prettier e Vitest concluído e commitado em `a70d363`.
 3. O catálogo público é embutido no PHP e não acessa tabelas; o módulo usa schema Zod compartilhado e endpoint estático, sem introspecção nem alteração do banco (`4ee7d75`).
 4. Módulo de autenticação implementado: schemas compartilhados, rotas Fastify, Drizzle repositories com driver MySQL para `usuarios`/logs, bcrypt, cookies HttpOnly, sessão/CSRF/flash em `node_sessions`, telas de login/cadastro e testes. As sessões PHP não são compartilhadas; recuperação de senha permanece sem envio/persistência de token.
@@ -47,8 +47,8 @@ Ordem sugerida — do mais isolado ao mais acoplado, com autenticação antecipa
 3. **Admin de questões/importação** (`admin_questoes.php`, `questoes_manager.php`, scripts JSON/XML de carga): migrado parcialmente nesta branch; APIs de estatísticas, exemplo e importação multipart JSON/XML, autorização admin, tela React e testes estão implementados. O schema novo `questoes` foi criado somente após autorização explícita, está no banco de desenvolvimento e não recebeu seed. As divergências PHP entre `ativa`/`ativo` e `data_criacao`/`created_at` são documentadas; a implementação segue o DDL efetivamente criado e ainda requer comparação com o runtime PHP.
 4. **Fórum** (`forum.php`, `admin_forum.php`): APIs e telas React para categorias, busca/listagem/detalhe, criação/resposta/curtida, moderação/admin/banimento/auditoria foram implementadas parcialmente. As cinco tabelas estavam ausentes; após autorização expressa, foram criadas apenas as tabelas novas, sem seed nem mudanças nas tabelas PHP. Falta paridade ao vivo com PHP, revisar diferenças de sessão/rate limit/mensagens e validar o conteúdo real após carga de categorias.
 5. **Simulado e resposta** (`simulador_provas.php`, `executar_teste.php`, `interface_teste.php`, `salvar_resposta.php`, `processar_teste.php`): catálogo, sessão, questão/timer, salvamento incremental e finalização foram migrados para `/simulador` e a API (`4477147`). As tabelas `sessoes_teste`, `respostas_usuario` e `resultados_testes` foram criadas após autorização explícita, sem seed. Mantém a divergência de dissertativa (substring no autosave, igualdade ao finalizar) e `total_questoes=120`. Testes usam questões sintéticas; o banco não tem questões ativas para teste integrado real.
-6. **Resultado, revisão e histórico** (`resultado_teste.php`, `revisar_prova.php`, `historico_testes.php`, `historico_provas.php`): implementados em `/resultados/:id`, `/resultados/:id/revisao`, `/historico/testes` e `/historico/provas`, com endpoints autenticados para detalhe, revisão, estatísticas e listagens. O histórico TS usa o ID confiável da sessão Node em vez da chave PHP incompatível `user_id`. Filtros de tipo/período continuam sem filtrar, como no PHP; badges ficam fora. Gates e comparação ao vivo com PHP ainda pendentes.
-7. **Corte e hardening:** teste E2E dos caminhos público/usuário/admin; comparar comportamento lado a lado; direcionar rotas por feature/reverse proxy; desativar scripts operacionais acessíveis publicamente ou movê-los para operação restrita; só remover PHP após paridade aceita, backup e rollback ensaiados.
+6. **Resultado, revisão e histórico** (`resultado_teste.php`, `revisar_prova.php`, `historico_testes.php`, `historico_provas.php`): implementados e commitados em `6abd4de` nas rotas `/resultados/:id`, `/resultados/:id/revisao`, `/historico/testes` e `/historico/provas`. Testes sintéticos, type-check, lint, formatação/build e smoke read-only API/MySQL passaram. O histórico TS usa o ID autenticado em vez da chave PHP incompatível `user_id`; filtros sem efeito e badges fora do escopo. Comparação ao vivo com PHP e E2E com dados continuam pendentes.
+7. **Corte:** aceito pelo responsável e executado após validação. A comparação pareada disponível cobriu fluxos selecionados em staging isolado. Hardening de proxy, HTTPS/cookies, rate-limit multi-instância, backups e rollback é requisito operacional do deploy, não altera o código PHP removido.
 
 Ordem dos módulos pode ser ajustada após introspecção se dependências ou integrações reais mudarem. Não alterar tabelas/dados PHP existentes. Tabelas novas autorizadas e criadas neste estágio: `node_sessions`, `questoes`, as cinco tabelas do fórum e `sessoes_teste`, `respostas_usuario`, `resultados_testes` no banco de desenvolvimento. Fórum e tabelas de simulados foram deixadas vazias.
 
@@ -139,4 +139,4 @@ Use Node.js compatível com o Vite e npm workspaces. `npm install` instala as de
 
 ## Próxima fronteira de migração
 
-Resultados, revisão e histórico estão implementados e aguardam validação automatizada final e commit isolado. Em seguida, o plano segue para hardening, testes E2E/paridade em ambiente PHP controlado e preparação do cutover; não há outra feature de negócio definida antes desses gates. `questoes` continua sem questões ativas para E2E integrado. O PHP permanece intacto e sessões PHP não são compartilhadas com Node.
+Os módulos planejados estão implementados parcialmente e commitados; PHP 8.2/pdo_mysql estão disponíveis e os smoke checks não mutáveis passaram. A conexão PHP pela configuração local continua falhando, enquanto a API Node conecta usando `.env`; ambas as configurações locais foram preservadas. Foi criado `daydreaming_parity_staging`, contendo as estruturas das 13 tabelas, 18 chaves estrangeiras e fixtures sintéticas, sem cópia de linhas do schema de desenvolvimento. Login, leitura de resultado/revisão/históricos e finalização do simulado passaram em comparação pareada parcial; ampliar para os módulos e casos de borda pendentes. Não criar dados de teste no schema de desenvolvimento. Nenhum cutover ou remoção do PHP deve ocorrer antes do aceite completo de paridade e rollback ensaiado.

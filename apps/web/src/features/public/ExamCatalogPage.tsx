@@ -24,7 +24,7 @@ const continentNames: Record<Continent, string> = {
 function openSimulator() {
   window.alert("Você precisa estar logado para prosseguir!");
   if (window.confirm("Deseja efetuar o login?")) {
-    window.location.href = "/login.php";
+    window.location.href = "/login";
   }
 }
 

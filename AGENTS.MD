@@ -1,55 +1,42 @@
-# AGENTS.MD — Base de conhecimento do projeto
+# Base de conhecimento do projeto
 
 ## Visão geral
 
-DayDreaming é uma aplicação PHP tradicional para cadastro e autenticação de usuários, fórum e simulados de exames internacionais. As páginas PHP na raiz também são as rotas HTTP: não há framework de roteamento nem separação formal entre apresentação, domínio e persistência.
+DayDreaming é um monorepo TypeScript com uma SPA React/Vite, API Fastify e pacote compartilhado. O PHP versionado foi removido após a validação e autorização de cutover pelo responsável do projeto. O banco MySQL existente continua sendo usado; schemas e dados não devem ser alterados por tarefas de limpeza.
 
 ## Executar localmente
 
-- Requisitos: PHP com PDO e driver MySQL habilitados e um servidor MySQL compatível.
-- A configuração local é `config.php`, ignorada pelo Git. Não a sobrescreva nem exponha seus valores. Use `config.exemplo.php` apenas como referência e obtenha credenciais de forma segura.
-- Para desenvolvimento, a documentação principal descreve o servidor embutido: `php -S localhost:8080`; acesse `http://localhost:8080`.
-- Não há `composer.json`, suíte PHPUnit/Pest ou configuração de testes identificada. Não invente dependências Composer sem confirmar necessidade.
-- Antes de executar comandos de instalação, seed, reparo ou reset, inspecione seu código e confirme o alvo do banco com a pessoa responsável. Alguns scripts fazem DDL/DML ou alteram dados e não devem ser rodados como verificações inofensivas.
+- Requisitos: Node.js compatível com Vite, npm e MySQL 8.
+- Configure as variáveis de conexão e runtime em `.env`; não imprima, sobrescreva ou versione credenciais.
+- Execute `npm install` e `npm run dev`; Vite fica em `http://localhost:5173`, API em `http://localhost:3001`.
+- Comandos de validação: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test` e `npm run build`.
+- Não há necessidade de Composer/PHP no runtime migrado.
 
-## Fluxos e arquivos principais
+## Workspaces e fluxos
 
-- `index.php`: página inicial; inclui `header_status.php`.
-- `login.php`, `cadastro.php`, `recuperar_senha.php`, `logout.php`: sessão e fluxo de usuários.
-- `verificar_auth.php`: inicialização de sessão e helpers de autenticação, autorização de admin, verificação de conta ativa e rate limiting.
-- `forum.php` e `admin_forum.php`: fórum e moderação.
-- `simulador_provas.php` → `executar_teste.php` → `interface_teste.php`: seleção, execução e interface do simulado.
-- `salvar_resposta.php` e `processar_teste.php`: persistência de respostas e finalização.
-- `resultado_teste.php`, `revisar_prova.php`, `historico_testes.php`, `historico_provas.php`: resultados, revisão e histórico.
-- `admin_questoes.php` e `questoes_manager.php`: gerenciamento e importação de questões JSON/XML.
-- `testes_internacionais.php`: página informativa com interação implementada em JavaScript inline.
-- `Exames/SAT/Exame_SAT_Test_4.json` e `Answers_SAT_Test_4.json`: dados SAT usados pelos scripts de carga.
-- `public/css/style.css`: CSS compartilhado; várias telas também têm CSS inline.
+- `apps/web`: UI React e React Router. Features estão em `src/features/` (auth, fórum, simulados, resultados, questões e conteúdo público).
+- `apps/api`: Fastify organizado por módulos, com rotas, serviços, repositórios Drizzle/MySQL e schemas.
+- `packages/shared`: contratos Zod e tipos partilhados entre frontend e API.
+- A autenticação usa cookie HttpOnly, sessão persistida em MySQL (`node_sessions`) e CSRF para mutações.
+- A SPA chama endpoints `/api/*`; o proxy de desenvolvimento para a API está em `apps/web/vite.config.ts`.
 
-## Banco de dados e scripts operacionais
+## Banco de dados e segurança operacional
 
-O acesso em runtime usa PDO por `conectarBD()` em `config.php`; SQL também está embutido diretamente nas páginas e nos scripts PHP. Os arquivos SQL versionados/locais (`db_structure.sql`, `forum_structure.sql`, `reset_database.sql`, `update_database.sql`) e scripts como `setup_database.php`, `criar_tabelas.php`, `inserir_dados.php`, `seed_questoes.php`, `completar_tabelas.php`, `recriar_tabelas_forum.php`, `corrigir_*.php`, `adicionar_*.php`, `limpar_questoes_extras.php` e os instaladores têm potencial de alterar schema ou dados. Não os execute sem entender o efeito e sem proteger os dados necessários.
+- O schema MySQL de runtime é configurado pelas variáveis `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` e `DATABASE_CHARSET`.
+- Schemas Drizzle estão em `apps/api/src/db/`; DDL de referência está em `apps/api/schema/`.
+- Scripts SQL antigos na raiz podem executar DDL, reset ou seed. Inspecione-os e confirme o alvo antes de rodar; não os use como testes inofensivos.
+- Não altere schema, dados ou migrations durante limpezas de código. Fixtures de paridade ficam em `daydreaming_parity_staging`, isoladas dos dados de desenvolvimento.
+- `config.php` é um arquivo local ignorado pelo Git e não é usado pelo runtime TypeScript. Preserve-o sem ler ou incluir em commits.
 
-Não altere banco, schema, migrations ou dados como parte de uma limpeza de arquivos. Preserve `config.php`, arquivos `.env` e credenciais; não os imprima nem inclua em commits.
+## Convenções de desenvolvimento
 
-## Convenções para mudanças
+- Siga a organização por feature e as fronteiras rota → serviço → repositório na API.
+- Compartilhe contratos de request/response no pacote `@daydreaming/shared` com Zod e mantenha TypeScript strict; evite `any`.
+- Use queries parametrizadas pelos repositórios Drizzle e valide entradas nos limites HTTP.
+- Preserve os formatos de resposta e mensagens legadas intencionalmente aceitos; documente diferenças de comportamento.
+- Para mudanças, rode o menor conjunto de testes aplicável e os type-check/lint/testes quando a superfície compartilhada ou o fluxo exigir.
+- Não faça commits, pushes, alterações no banco ou remoções fora do escopo sem autorização explícita.
 
-- Siga o estilo PHP existente e use `require_once` para dependências compartilhadas já estabelecidas.
-- Preserve os nomes de sessão usados pelo sistema, em especial `$_SESSION['usuario_id']`, `usuario_nome`, `usuario_login` e `is_admin`, salvo alteração coordenada de todos os fluxos.
-- Formulários enviam dados via `$_POST`; filtros/identificadores usam `$_GET`; redirecionamentos usam `header('Location: ...')`. Validar e escapar dados continua necessário, mesmo quando a tela gera HTML no PHP.
-- Use prepared statements PDO para entrada variável nas consultas. Evite espalhar novas consultas entre views quando couber no fluxo atual.
-- Não introduza Composer, framework, camada de rotas, cron, webhook ou assets sem uso demonstrado e configuração correspondente.
-- Após mudanças, verifique referências às páginas/assets alterados, rode `php -l` nos PHP modificados quando PHP estiver disponível e teste manualmente os fluxos impactados com banco de desenvolvimento apropriado. Não execute testes ou setup que possam alterar um banco compartilhado.
+## Estado do cutover
 
-## Pontos conhecidos para a migração TypeScript
-
-- PHP, HTML e CSS inline estão misturados em várias páginas; cada arquivo raiz pode servir simultaneamente como rota, controlador e view.
-- SQL/PDO estão distribuídos pelas páginas, autenticação e scripts de setup; falta uma fronteira única de persistência.
-- Configuração, conexão e helpers usam constantes/funções globais carregadas por include; sessão e request dependem de superglobais PHP.
-- Há scripts de instalação/correção/carga sobrepostos e é preciso separar os que são procedimentos operacionais dos que devem permanecer no runtime.
-- As estruturas de badges/níveis ainda são consultadas por telas e aparecem no banco, mas o serviço de concessão de badges foi removido na limpeza anterior porque não havia chamadas ativas. Decida explicitamente se a gamificação deve voltar na migração; não assuma que schema existente prova que o fluxo funciona.
-- PHP e Composer não estavam disponíveis na sessão de limpeza anterior; a aplicação e os scripts não foram executados ali. Faça validação real antes de concluir uma mudança funcional.
-
-## Limpeza anterior
-
-A limpeza agressiva anterior foi feita na branch `limpeza/agressiva`. Foram removidos testes e diagnósticos soltos, variantes órfãs da home/SAT, assets não referenciados, o serviço sem chamadas `badges_manager.php`, helpers não usados e o JavaScript genérico que não tinha markup/serviços correspondentes. Os dados JSON SAT e os arquivos de banco/configuração foram mantidos. A análise foi estática e não substitui testes de runtime.
+O responsável validou a migração e autorizou remover os arquivos PHP versionados. A autenticação PHP e Node não compartilham sessões; usuários precisam autenticar-se novamente no runtime novo. Diferenças de comportamento e itens intencionalmente fora do escopo estão documentados em `MIGRACAO.md`. O arquivo local ignorado `config.php`, `.env`, banco e scripts SQL preservados não fazem parte da remoção.
